@@ -1,0 +1,2 @@
+# ScholarSHIP-Back
+> using django
