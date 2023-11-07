@@ -1,2 +1,2 @@
 # ScholarSHIP-Back
-> using django
+> built by 10 WALNUTS using django
