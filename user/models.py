@@ -1,3 +1,23 @@
 from django.db import models
 
+
+class User(models.Model):
+    id = models.AutoField(primary_key=True)
+    user_name = models.CharField(max_length=128, unique=True)
+    password = models.CharField(max_length=128)
+    email = models.EmailField(unique=True)
+    # image = models.ImageField(max_length=128)
+    scholar_id = models.CharField(max_length=128, default="")
+    organization = models.CharField(max_length=128, default="")
+    introduction = models.TextField(max_length=128, default="")
+    real_name = models.CharField(max_length=128, default="")
+    user_degree = models.CharField(max_length=128, default="")
+
+    def __str__(self):
+        return self.userName
+
+    class Meta:
+        db_table = "users"
+
+
 # Create your models here.
