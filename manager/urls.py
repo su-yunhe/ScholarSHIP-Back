@@ -1,5 +1,11 @@
 from django.urls import path
 
-from .views import register, login
+from .views import *
 
-urlpatterns = [path("manager_register", register), path("manager_login", login)]
+urlpatterns = [
+    path("manager_register", register),
+    path("manager_login", login),
+    path("get_all_user", get_all_user),
+    path("get_single_user", get_single_user),
+    path("user_delete", user_delete),
+]

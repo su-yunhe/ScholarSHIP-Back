@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 import re
 from utils.token import create_token
 from .models import Manager
+from user.models import *
 
 
 class RegisterForm(forms.Form):
@@ -112,4 +113,32 @@ def login(request):
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
 
 
-# Create your views here.
+@csrf_exempt
+def get_all_user(request):
+    if request.method == "POST":
+        results = list(User.objects.values())
+        return JsonResponse({"error": 0, "msg": "获取所有用户成功", "results": results})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def get_single_user(request):
+    if request.method == "POST":
+        userid = request.POST.get("id")
+        # print(fileid)
+        results = list(User.objects.filter(id=userid).values())
+        return JsonResponse({"error": 0, "msg": "获取该用户成功", "results": results})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def user_delete(request):
+    if request.method == "POST":
+        userid = request.POST.get("id")
+        results = User.objects.get(id=userid)
+        results.delete()
+        return JsonResponse({"error": 0, "msg": "删除用户成功"})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
