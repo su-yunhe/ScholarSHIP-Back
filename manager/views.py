@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import re
 from utils.token import create_token
-from .models import Manager
+from .models import *
 from user.models import *
 
 
@@ -140,5 +140,26 @@ def user_delete(request):
         results = User.objects.get(id=userid)
         results.delete()
         return JsonResponse({"error": 0, "msg": "删除用户成功"})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def apply_modify_condition(request):
+    if request.method == "POST":
+        id = request.POST.get("id")
+        results = Application.objects.get(id=id)
+        results.status = True
+        results.save()
+        userid = request.POST.get("userid")
+        scholar_id = request.POST.get("scholar_id")
+        organization = request.POST.get("organization")
+        real_name = request.POST.get("real_name")
+        target = User.objects.get(id=userid)
+        target.scholar_id = scholar_id
+        target.organization = organization
+        target.real_name = real_name
+        target.save()
+        return JsonResponse({"error": 0, "msg": "申请审核通过"})
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})

@@ -1,9 +1,11 @@
+from ast import List
 from django import forms
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import re
 from utils.token import create_token
-from .models import User
+from .models import *
+from manager.models import *
 
 
 class RegisterForm(forms.Form):
@@ -107,5 +109,279 @@ def login(request):
         else:
             return JsonResponse({"error": 3001, "msg": "表单信息验证失败"})
 
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def concern_add(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        scholar_id = request.POST.get("scholar_id")
+        new_concern = Concern()
+        new_concern.user_id = userid
+        new_concern.scholar_id = scholar_id
+        new_concern.save()
+        return JsonResponse({"error": 0, "msg": "添加关注成功"})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def concern_delete(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        scholar_id = request.POST.get("scholar_id")
+        target = (
+            Concern.objects.filter(user_id=userid).filter(scholar_id=scholar_id).get()
+        )
+        print(target.isDelete)
+        target.isDelete = True
+        target.save()
+        print(target.isDelete)
+        return JsonResponse({"error": 0, "msg": "取消关注成功"})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def get_all_concern(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        results = list(
+            Concern.objects.filter(user_id=userid).filter(isDelete=0).values()
+        )
+        return JsonResponse({"error": 0, "msg": "获取关注列表成功", "results": results})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def get_single_concern(request):
+    if request.method == "POST":
+        userid = request.POST.get("id")
+        scholar_id = request.POST.get("scholar_id")
+        results = list(
+            Concern.objects.filter(id=userid).filter(scholar_id=scholar_id).values()
+        )
+        return JsonResponse({"error": 0, "msg": "获取该关注成功", "results": results})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def label_star_add(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        lname = request.POST.get("name")
+        new_label = Label()
+        new_label.user_id = userid
+        new_label.name = lname
+
+        new_label.save()
+        return JsonResponse({"error": 0, "msg": "添加标签成功"})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def label_star_get_all(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        results = list(Label.objects.filter(user_id=userid).filter(isDelete=0).values())
+        return JsonResponse({"error": 0, "msg": "获取所有标签成功", "results": results})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def label_star_get_single(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        id = request.POST.get("label_id")
+        results = list(Label.objects.filter(user_id=userid).filter(id=id).values())
+        return JsonResponse({"error": 0, "msg": "获取该标签成功", "results": results})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def label_delete(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        id = request.POST.get("id")
+        is_delete = request.POST.get("isDelete")
+        target = Label.objects.filter(user_id=userid).filter(id=id).get()
+        target.isDelete = is_delete
+        target.save()
+        star_list = list(Star.objects.filter(user_id=userid).filter(label_id=id))
+        for obj in star_list:
+            obj.isDelete = is_delete
+            obj.save()
+
+        return JsonResponse({"error": 0, "msg": "删除标签成功"})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def star_add(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        labelid = request.POST.get("label_id")
+        articleid = request.POST.get("article_id")
+        time = request.POST.get("time")
+        new_star = Star()
+        new_star.user_id = userid
+        new_star.label_id = labelid
+        new_star.article_id = articleid
+        new_star.time = time
+        new_star.save()
+        return JsonResponse({"error": 0, "msg": "添加收藏成功"})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def star_get_all(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        labelid = request.POST.get("label_id")
+        results = list(
+            Star.objects.filter(user_id=userid)
+            .filter(label_id=labelid)
+            .filter(isDelete=0)
+            .values()
+        )
+        return JsonResponse({"error": 0, "msg": "获取该标签所有收藏成功", "results": results})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def star_get_single(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        label_id = request.POST.get("label_id")
+        id = request.POST.get("star_id")
+        results = list(
+            Star.objects.filter(user_id=userid)
+            .filter(label_id=label_id)
+            .filter(id=id)
+            .values()
+        )
+        return JsonResponse({"error": 0, "msg": "获取该标签成功", "results": results})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def star_delete(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        labelid = request.POST.get("label_id")
+        id = request.POST.get("id")
+        is_delete = request.POST.get("isDelete")
+        target = (
+            Star.objects.filter(user_id=userid)
+            .filter(label_id=labelid)
+            .filter(id=id)
+            .get()
+        )
+        target.isDelete = is_delete
+        target.save()
+        return JsonResponse({"error": 0, "msg": "取消收藏成功"})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def history_add(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        type = request.POST.get("type")
+        real_id = request.POST.get("real_id")
+        time = request.POST.get("time")
+        new_history = History()
+        new_history.user_id = userid
+        new_history.type = type
+        new_history.real_id = real_id
+        new_history.time = time
+        new_history.save()
+        return JsonResponse({"error": 0, "msg": "添加历史记录成功"})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def History_get_all(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        results = list(
+            History.objects.filter(user_id=userid).filter(isDelete=0).values()
+        )
+        return JsonResponse({"error": 0, "msg": "获取所有历史成功", "results": results})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def History_get_single(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        id = request.POST.get("id")
+        results = list(History.objects.filter(user_id=userid).filter(id=id).values())
+        return JsonResponse({"error": 0, "msg": "获取该历史记录成功", "results": results})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def History_delete_single(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        id = request.POST.get("id")
+        is_delete = request.POST.get("isDelete")
+        target = (
+            History.objects.filter(user_id=userid).filter(id=id).filter(id=id).get()
+        )
+        target.isDelete = is_delete
+        target.save()
+        return JsonResponse({"error": 0, "msg": "删除该历史记录成功"})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def History_delete_all(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        is_delete = request.POST.get("isDelete")
+        history_list = list(History.objects.filter(user_id=userid))
+        for obj in history_list:
+            obj.isDelete = is_delete
+            obj.save()
+        return JsonResponse({"error": 0, "msg": "删除所有历史记录成功"})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def apply_add(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        scholar_id = request.POST.get("scholar_id")
+        email = request.POST.get("email")
+        content = request.POST.get("content")
+        time = request.POST.get("time")
+        new_apply = Application()
+        new_apply.user_id = userid
+        new_apply.scholar_id = scholar_id
+        new_apply.email = email
+        new_apply.content = content
+        new_apply.time = time
+
+        new_apply.save()
+        return JsonResponse({"error": 0, "msg": "提交申请成功"})
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})

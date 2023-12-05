@@ -20,4 +20,45 @@ class User(models.Model):
         db_table = "users"
 
 
-# Create your models here.
+class Concern(models.Model):
+    id = models.AutoField(primary_key=True)
+    user_id = models.IntegerField(default="0")
+    scholar_id = models.CharField(max_length=128, default="")
+    isDelete = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "user_concern"
+
+
+class Label(models.Model):
+    id = models.AutoField(primary_key=True)
+    user_id = models.IntegerField(default="0")
+    name = models.CharField(max_length=128, default="")
+    isDelete = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "user_label"
+
+
+class Star(models.Model):
+    id = models.AutoField(primary_key=True)
+    user_id = models.IntegerField(default="0")
+    label_id = models.IntegerField(default="0")
+    article_id = models.TextField(default="")
+    time = models.DateTimeField(default="")
+    isDelete = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "user_star"
+
+
+class History(models.Model):
+    id = models.AutoField(primary_key=True)
+    user_id = models.IntegerField(default="0")
+    type = models.IntegerField(default="0")
+    real_id = models.TextField(default="")
+    time = models.DateTimeField(default="")
+    isDelete = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "user_browse_history"

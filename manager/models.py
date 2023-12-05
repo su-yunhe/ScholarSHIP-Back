@@ -14,3 +14,16 @@ class Manager(models.Model):
 
     class Meta:
         db_table = "manager"
+
+
+class Application(models.Model):
+    id = models.AutoField(primary_key=True)
+    user_id = models.IntegerField(default="0")
+    scholar_id = models.CharField(max_length=128, default="")
+    email = models.EmailField(unique=True)
+    content = models.TextField(default="")
+    time = models.DateTimeField(default="")
+    status = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "scholar_apply"
