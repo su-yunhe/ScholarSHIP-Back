@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,9 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "_(6a7b%au6%30g$fc9vf93ssme+p$@_*qd8t2y9u5d@p^09-zr"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+# 修改项。允许所有的IP访问网络服务
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -83,7 +84,7 @@ DATABASES = {
         "NAME": "10walnuts",
         "USER": "root",
         "PASSWORD": "123456",
-        "HOST": "120.46.215.246",
+        "HOST": "119.3.252.71",
         "PORT": "3306",
     }
 }
@@ -126,3 +127,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = "/static/"
+
+# 修改项。指定需要收集的静态文件的位置
+# 即前端打包文件所在位置
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "frontend/dist/"),
+]
+
+# 新增项。静态文件收集目录
+STATIC_ROOT = os.path.join(BASE_DIR, 'collected_static')

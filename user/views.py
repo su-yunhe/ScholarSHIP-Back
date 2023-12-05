@@ -46,7 +46,9 @@ def register(request):
         if password1 != password2:
             return JsonResponse({"error": 4003, "msg": "两次输入的密码不一致"})
         # 检测密码不符合规范：8-18，英文字母+数字
+        print(type(password1))
         if not re.match("^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{8,18}$", password1):
+
             return JsonResponse({"error": 4004, "msg": "密码不符合规范"})
 
         new_user = User()
