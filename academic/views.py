@@ -125,12 +125,14 @@ def get_relation(root_id):
                 result_lines.append({
                     "from": author.get('id'),
                     "to": to_author.get('id'),
+                    "text": "合著",
                     "article": article_name,
                 })
             if author not in result_authors:
                 result_authors.append({
                     "id": author.get('id'),
-                    "name": author.get('name')
+                    "text": author.get('name')
                 })
 
     return {'root_id': root_id, 'nodes': result_authors, 'lines': result_lines}
+
