@@ -115,6 +115,16 @@ def login(request):
 
 
 @csrf_exempt
+def get_user_info(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        results = list(User.objects.filter(id=userid).values())
+        return JsonResponse({"error": 0, "msg": "获取用户信息成功", "results": results})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
 def concern_add(request):
     if request.method == "POST":
         userid = request.POST.get("userid")
@@ -152,6 +162,11 @@ def get_all_concern(request):
         results = list(
             Concern.objects.filter(user_id=userid).filter(isDelete=0).values()
         )
+        for obj in results:
+            scholar = User.objects.get(scholar_id=obj["scholar_id"])
+            obj["scholar_name"] = scholar.real_name
+            obj["scholar_introduction"] = scholar.introduction
+
         return JsonResponse({"error": 0, "msg": "获取关注列表成功", "results": results})
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
@@ -175,12 +190,27 @@ def label_star_add(request):
     if request.method == "POST":
         userid = request.POST.get("userid")
         lname = request.POST.get("name")
-        new_label = Label()
-        new_label.user_id = userid
-        new_label.name = lname
+        label_temp = Label.objects.filter(name=lname)
+        if label_temp.exists():
+            new_label = Label()
+            new_label.user_id = userid
+            new_label.name = lname
 
-        new_label.save()
-        return JsonResponse({"error": 0, "msg": "添加标签成功"})
+            new_label.save()
+            return JsonResponse(
+                {
+                    "error": 0,
+                    "msg": "添加标签成功",
+                    "label": list(Label.objects.filter(id=new_label.id).values()),
+                }
+            )
+        else:
+            return JsonResponse(
+                {
+                    "error": 0,
+                    "msg": "标签重名",
+                }
+            )
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
 
@@ -321,6 +351,10 @@ def History_get_all(request):
         results = list(
             History.objects.filter(user_id=userid).filter(isDelete=0).values()
         )
+        for obj in results:
+            scholar = User.objects.get(scholar_id=obj["scholar_id"])
+            obj["scholar_name"] = scholar.real_name
+            obj["scholar_introduction"] = scholar.introduction
         return JsonResponse({"error": 0, "msg": "获取所有历史成功", "results": results})
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
