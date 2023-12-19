@@ -48,7 +48,6 @@ def register(request):
         # 检测密码不符合规范：8-18，英文字母+数字
         print(type(password1))
         if not re.match("^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{8,18}$", password1):
-
             return JsonResponse({"error": 4004, "msg": "密码不符合规范"})
 
         new_user = User()
@@ -119,7 +118,7 @@ def login(request):
 def concern_add(request):
     if request.method == "POST":
         userid = request.POST.get("userid")
-        scholar_id = request.POST.get("scholar_id")
+        scholar_id = request.POST.get("scholarId")
         new_concern = Concern()
         new_concern.user_id = userid
         new_concern.scholar_id = scholar_id
@@ -133,7 +132,7 @@ def concern_add(request):
 def concern_delete(request):
     if request.method == "POST":
         userid = request.POST.get("userid")
-        scholar_id = request.POST.get("scholar_id")
+        scholar_id = request.POST.get("scholarId")
         target = (
             Concern.objects.filter(user_id=userid).filter(scholar_id=scholar_id).get()
         )
@@ -162,7 +161,7 @@ def get_all_concern(request):
 def get_single_concern(request):
     if request.method == "POST":
         userid = request.POST.get("id")
-        scholar_id = request.POST.get("scholar_id")
+        scholar_id = request.POST.get("scholarId")
         results = list(
             Concern.objects.filter(id=userid).filter(scholar_id=scholar_id).values()
         )
@@ -200,7 +199,7 @@ def label_star_get_all(request):
 def label_star_get_single(request):
     if request.method == "POST":
         userid = request.POST.get("userid")
-        id = request.POST.get("label_id")
+        id = request.POST.get("labelId")
         results = list(Label.objects.filter(user_id=userid).filter(id=id).values())
         return JsonResponse({"error": 0, "msg": "获取该标签成功", "results": results})
     else:
@@ -230,8 +229,8 @@ def label_delete(request):
 def star_add(request):
     if request.method == "POST":
         userid = request.POST.get("userid")
-        labelid = request.POST.get("label_id")
-        articleid = request.POST.get("article_id")
+        labelid = request.POST.get("labelId")
+        articleid = request.POST.get("articleId")
         time = request.POST.get("time")
         new_star = Star()
         new_star.user_id = userid
@@ -248,7 +247,7 @@ def star_add(request):
 def star_get_all(request):
     if request.method == "POST":
         userid = request.POST.get("userid")
-        labelid = request.POST.get("label_id")
+        labelid = request.POST.get("labelId")
         results = list(
             Star.objects.filter(user_id=userid)
             .filter(label_id=labelid)
@@ -264,7 +263,7 @@ def star_get_all(request):
 def star_get_single(request):
     if request.method == "POST":
         userid = request.POST.get("userid")
-        label_id = request.POST.get("label_id")
+        label_id = request.POST.get("labelId")
         id = request.POST.get("star_id")
         results = list(
             Star.objects.filter(user_id=userid)
@@ -281,7 +280,7 @@ def star_get_single(request):
 def star_delete(request):
     if request.method == "POST":
         userid = request.POST.get("userid")
-        labelid = request.POST.get("label_id")
+        labelid = request.POST.get("labelId")
         id = request.POST.get("id")
         is_delete = request.POST.get("isDelete")
         target = (
@@ -302,7 +301,7 @@ def history_add(request):
     if request.method == "POST":
         userid = request.POST.get("userid")
         type = request.POST.get("type")
-        real_id = request.POST.get("real_id")
+        real_id = request.POST.get("realId")
         time = request.POST.get("time")
         new_history = History()
         new_history.user_id = userid
@@ -372,7 +371,7 @@ def History_delete_all(request):
 def apply_add(request):
     if request.method == "POST":
         userid = request.POST.get("userid")
-        scholar_id = request.POST.get("scholar_id")
+        scholar_id = request.POST.get("scholarId")
         email = request.POST.get("email")
         content = request.POST.get("content")
         time = request.POST.get("time")
