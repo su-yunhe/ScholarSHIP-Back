@@ -38,13 +38,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'corsheaders',
     "test1",
     "user",
     "manager",
     "academic",
     "dataAnalysis",
-    "author",
 ]
 
 MIDDLEWARE = [
@@ -56,40 +54,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "middleware.tokenmiddleware.MyMiddleware",
-    'corsheaders.middleware.CorsMiddleware',
 ]
-
-# 跨域增加忽略
-CORS_ALLOW_CREDENTIALS = True  # 允许携带Cookie
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = (
-    '*'
-)
-
-# 跨域问题解决
-CORS_ALLOW_METHODS = (
-    'DELETE',
-    'GET',
-    'OPTIONS',
-    'PATCH',
-    'POST',
-    'PUT',
-    'VIEW',
-)
-
-CORS_ALLOW_HEADERS = (
-    'XMLHttpRequest',
-    'X_FILENAME',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
-    'Pragma',
-)
 
 ROOT_URLCONF = "ScholarSHIP.urls"
 
