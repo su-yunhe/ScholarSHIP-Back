@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import requests
+import math
 # from elasticsearch import Elasticsearch
 
 # es_url = "https://10.192.80.18:9200"
@@ -275,46 +276,59 @@ def get_scholar_papers(request):
         response = requests.get(api_url)
         if response.status_code == 200:
             author = response.json()
-            works_api_url = author['works_api_url']
-            response = requests.get(works_api_url)
+            works_api_url1 = author['works_api_url']
+            response = requests.get(works_api_url1)
 
             if response.status_code == 200:
                 data = response.json()
                 num = data['meta']['count']
-                ws = data['results']
+                per_page = data['meta']['per_page']
+                page = math.ceil(num / per_page)  # 向上取整
                 works = []
-                for work in ws:
-                    id = work['id'].split('/')[-1]
-                    title = work['title']
-                    year = work['publication_year']
-                    citation = work['cited_by_count']
-                    doi = str(work['doi']).split('//')[-1].split('/', 1)[-1]
-                    url = work['primary_location']['landing_page_url']
-                    pdf_url = work['primary_location']['pdf_url']
-                    authors = []
-                    for author in work['authorships']:
-                        author_position = author['author_position']
-                        author_id = author['author']['id'].split('/')[-1]
-                        author_name = author['author']['display_name']
-                        authors.append({
-                            'author_position': author_position,
-                            'author_id': author_id,
-                            'author_name': author_name,
+                for i in range(1, page + 1):
+                    works_api_url = works_api_url1 + f'&per-page=25&page={i}'
+                    print(works_api_url)
+                    response = requests.get(works_api_url)
+                    data = response.json()
+                    ws = data['results']
+                    for work in ws:
+                        id = work['id'].split('/')[-1]
+                        title = work['title']
+                        year = work['publication_year']
+                        citation = work['cited_by_count']
+                        doi = str(work['doi']).split('//')[-1].split('/', 1)[-1]
+                        if not work['primary_location'] is None:
+                            url = work['primary_location']['landing_page_url']
+                            pdf_url = work['primary_location']['pdf_url']
+                        else:
+                            url = ''
+                            pdf_url = ''
+                        # url = work['primary_location']['landing_page_url']
+                        # pdf_url = work['primary_location']['pdf_url']
+                        authors = []
+                        for author in work['authorships']:
+                            author_position = author['author_position']
+                            author_id = author['author']['id'].split('/')[-1]
+                            author_name = author['author']['display_name']
+                            authors.append({
+                                'author_position': author_position,
+                                'author_id': author_id,
+                                'author_name': author_name,
+                            })
+                        abstract = ''
+                        keywords = work['keywords']
+                        works.append({
+                            'id': id,
+                            'title': title,
+                            'year': year,
+                            'citation': citation,
+                            'doi': doi,
+                            'url': url,
+                            'pdf_url': pdf_url,
+                            'authors': authors,
+                            'abstract': abstract,
+                            'keywords': keywords
                         })
-                    abstract = ''
-                    keywords = work['keywords']
-                    works.append({
-                        'id': id,
-                        'title': title,
-                        'year': year,
-                        'citation': citation,
-                        'doi': doi,
-                        'url': url,
-                        'pdf_url': pdf_url,
-                        'authors': authors,
-                        'abstract': abstract,
-                        'keywords': keywords
-                    })
                 return JsonResponse(
                     {'error': 0, 'msg': '查询成功', 'Num': num, 'papers': works})
             else:
