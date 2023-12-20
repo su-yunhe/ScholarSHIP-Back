@@ -7,4 +7,5 @@ urlpatterns = [
     path("get_works", get_works),
     path("get_detail", get_detail),
     path("change_status", change_status),
+    path("get_citation", get_citation),
 ]
