@@ -16,14 +16,19 @@ def get_works(request):
     status = request.GET.get('status')
     response = requests.get(f'https://api.openalex.org/works?filter=authorships.author.id:{author_id}&select=authorships,cited_by_count,display_name,doi,id,language,publication_date')
     articles = response.json().get('results')
+    # print(articles)
     unbanned_articles = []
     banned_articles = []
     for article in articles:
         authors = []
         for author in article.get('authorships'):
             authors.append(author.get('author'))
-        i = article.get('authorships')[0].get('institutions')[0]
-        institution = {"id": i.get('id'), "display_name": i.get('display_name')}
+        i = article.get('authorships')[0].get('institutions')
+        if len(i) != 0:
+            i = i[0]
+            institution = {"id": i.get('id'), "display_name": i.get('display_name')}
+        else:
+            institution = None
         article["authors"] = authors
         article["institution"] = institution
         article.pop("authorships")
@@ -32,9 +37,8 @@ def get_works(request):
             banned_articles.append(article)
         else:
             unbanned_articles.append(article)
-
     return_articles = unbanned_articles if status == "true" else banned_articles
-    return JsonResponse({"articles": return_articles})
+    return JsonResponse({"error": 0, "result": return_articles})
 
 
 @csrf_exempt
@@ -46,7 +50,7 @@ def get_detail(request):
 
     if ban_info.exists():
         if user_id not in ban_info.first().author_id:
-            return JsonResponse({"err": "未找到论文"})
+            return JsonResponse({"error": 3001, "msg": "未找到论文"})
 
     response = requests.get(f'https://api.openalex.org/{work_id}/?select=abstract_inverted_index,authorships,cited_by_count,concepts,counts_by_year,display_name,title,doi,id,institutions_distinct_count,language,primary_location,publication_date,referenced_works,related_works,type')
     article = response.json()
@@ -87,7 +91,7 @@ def get_detail(request):
         related.append(data.get('title'))
     article["related_works"] = related
 
-    return JsonResponse({"result": article})
+    return JsonResponse({"error": 0, "result": article})
 # @csrf_exempt
 # @require_http_methods(['GET'])
 # def get_detail(request):
@@ -97,7 +101,7 @@ def get_detail(request):
 #
 #     if ban_info.exists():
 #         if user_id not in ban_info.first().author_id:
-#             return JsonResponse({"err": "未找到论文"})
+#             return JsonResponse({"error": 3001, "msg": 未找到论文"})
 #
 #     response = requests.get(f'https://api.openalex.org/{work_id}/?select=abstract_inverted_index,authorships,cited_by_count,concepts,counts_by_year,display_name,title,doi,id,institutions_distinct_count,language,primary_location,publication_date,referenced_works,related_works,type')
 #     article = response.json()
@@ -123,7 +127,7 @@ def get_detail(request):
 #         article["abstract"] = ' '.join(abstract)
 #         article.pop('abstract_inverted_index')
 #
-#     return JsonResponse({"result": article})
+#     return JsonResponse({"error": 0, "result": article})
 
 
 @csrf_exempt
@@ -139,24 +143,22 @@ def change_status(request):
         authors = [author.get("author").get("id").split('/')[-1] for author in authors]
         Ban.objects.create(work_id=work_id, author_id=authors)
 
-    return JsonResponse({"err": 0})
+    return JsonResponse({"error": 0})
 
 
 @csrf_exempt
 @require_http_methods(['GET'])
 def get_relation_map(request):
     root_id = request.GET.get('root_id')
-    print(root_id)
     result_json = get_relation(root_id)
 
-    return JsonResponse(result_json)
+    return JsonResponse({"error": 0, "result": result_json})
 
 
 def get_relation(root_id):
     response = requests.get(f'https://api.openalex.org/works?filter=authorships.author.id:{root_id}&select=title,authorships&sort=cited_by_count')
     data = response.json()
     results = data.get('results', [])
-    # print(results)
     if not results:
         return None
     results = results[:5]
@@ -177,11 +179,12 @@ def get_relation(root_id):
                     "text": "合著",
                     "article": article_name,
                 })
-            if author not in result_authors:
-                result_authors.append({
+            author_json = {
                     "id": author.get('id'),
                     "text": author.get('name')
-                })
+                }
+            if author_json not in result_authors:
+                result_authors.append(author_json)
 
     return {'root_id': root_id, 'nodes': result_authors, 'lines': result_lines}
 
@@ -383,11 +386,8 @@ def get_citation(request):
     work_id = request.GET.get('work_id')
     citation_type = request.GET.get('citation_type')
 
-    print(work_id)
-
     response = requests.get(f'https://api.openalex.org/{work_id}')
     paper_data = response.json()
-    print(paper_data)
     if citation_type == "IEEE":
         citation_result = generate_ieee_citation(paper_data)
     elif citation_type == "GB/T7714":
@@ -399,6 +399,6 @@ def get_citation(request):
     else:
         citation_result = "type error"
 
-    return JsonResponse({"result": citation_result})
+    return JsonResponse({"error": 0, "result": citation_result})
 
 
