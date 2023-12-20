@@ -5,11 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d0958277-33b3-4314-a5de-94f871e13119" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/ScholarSHIP-Back.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ScholarSHIP-Back.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ScholarSHIP/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/ScholarSHIP/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ScholarSHIP/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/ScholarSHIP/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/author/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/author/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -106,7 +102,7 @@
       <workItem from="1703002111164" duration="1706000" />
       <workItem from="1703040411227" duration="76000" />
       <workItem from="1703040490413" duration="37000" />
-      <workItem from="1703040529631" duration="5064000" />
+      <workItem from="1703040529631" duration="12168000" />
     </task>
     <servers />
   </component>

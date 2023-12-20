@@ -103,19 +103,23 @@ def get_scholar(request):
             author_id = author['id']
             orcid = author['orcid']
             name = author['display_name']
-            institution = author['last_known_institution']
+            institution_name = author['last_known_institution']['display_name']
             citations = author['cited_by_count']
             h_index = author['summary_stats']['h_index']
-            papers = author['works_api_url']
 
             return JsonResponse({
-                'error': 0,
-                'msg': 'success',
-                'name': name,
-                'institution': institution,
-                'papers': papers,
-                'citation': citations,
-                'hIndex': h_index,
+                'data': {
+                    'error': 0,
+                    'msg': 'success',
+                    'data': {
+                        'scholar_id': scholar_id,
+                        'name': name,
+                        'institution': institution_name,
+                        'essayNum': 0,
+                        'citation': citations,
+                        'hIndex': h_index,
+                    }
+                }
             })
         else:
             print(f"Error: {response.status_code} - {response.text}")
@@ -330,7 +334,14 @@ def get_scholar_papers(request):
                             'keywords': keywords
                         })
                 return JsonResponse(
-                    {'error': 0, 'msg': '查询成功', 'Num': num, 'papers': works})
+                    {
+                        'data': {
+                            'error': 0,
+                            'msg': '查询成功',
+                            'Num': num,
+                            'papers': works
+                        }
+                    })
             else:
                 # 处理错误
                 print(f"Error: {response.status_code} - {response.text}")
