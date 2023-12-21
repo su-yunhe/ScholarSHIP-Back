@@ -1,11 +1,20 @@
 from ast import List
+import json
 from django import forms
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import re
+
+import requests
 from utils.token import create_token
 from .models import *
 from manager.models import *
+
+author_url = "https://api.openalex.org/authors"
+institution_url = "https://api.openalex.org/institutions"
+work_url = "https://api.openalex.org/works"
+concept_url = "https://api.openalex.org/concepts"
+source_url = "https://api.openalex.org/sources"
 
 
 class RegisterForm(forms.Form):
@@ -190,8 +199,15 @@ def label_star_add(request):
     if request.method == "POST":
         userid = request.POST.get("userid")
         lname = request.POST.get("name")
-        label_temp = Label.objects.filter(name=lname)
+        label_temp = Label.objects.filter(name=lname).filter(isDelete=0)
         if label_temp.exists():
+            return JsonResponse(
+                {
+                    "error": 0,
+                    "msg": "标签重名",
+                }
+            )
+        else:
             new_label = Label()
             new_label.user_id = userid
             new_label.name = lname
@@ -204,13 +220,7 @@ def label_star_add(request):
                     "label": list(Label.objects.filter(id=new_label.id).values()),
                 }
             )
-        else:
-            return JsonResponse(
-                {
-                    "error": 0,
-                    "msg": "标签重名",
-                }
-            )
+
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
 
@@ -261,14 +271,37 @@ def star_add(request):
         userid = request.POST.get("userid")
         labelid = request.POST.get("labelId")
         articleid = request.POST.get("articleId")
-        time = request.POST.get("time")
         new_star = Star()
         new_star.user_id = userid
         new_star.label_id = labelid
         new_star.article_id = articleid
-        new_star.time = time
+        url = (
+            work_url
+            + "/"
+            + articleid
+            + "?select=id,title,publication_date,cited_by_count,abstract_inverted_index"
+        )
+        data = requests.get(url)
+        data1 = data.json()
+        new_star.content = getAbstract(data1["abstract_inverted_index"])
+        new_star.time = data1["publication_date"]
+        new_star.title = data1["title"]
+        new_star.cite_count = data1["cited_by_count"]
+
+        url1 = work_url + "/" + articleid + "?select=authorships"
+        data = requests.get(url1)
+        data1 = data.json()
+        authors_list = [
+            authorship.get("author", {}) for authorship in data1["authorships"]
+        ]
+        for obj in authors_list:
+            new_link = ArticleAuthor()
+            new_link.article_id = articleid
+            new_link.scholar_name = obj["display_name"]
+            new_link.save()
+
         new_star.save()
-        return JsonResponse({"error": 0, "msg": "添加收藏成功"})
+        return JsonResponse({"error": 0, "msg": "添加收藏成功", "data": authors_list})
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
 
@@ -351,10 +384,6 @@ def History_get_all(request):
         results = list(
             History.objects.filter(user_id=userid).filter(isDelete=0).values()
         )
-        for obj in results:
-            scholar = User.objects.get(scholar_id=obj["scholar_id"])
-            obj["scholar_name"] = scholar.real_name
-            obj["scholar_introduction"] = scholar.introduction
         return JsonResponse({"error": 0, "msg": "获取所有历史成功", "results": results})
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
@@ -420,3 +449,17 @@ def apply_add(request):
         return JsonResponse({"error": 0, "msg": "提交申请成功"})
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def getAbstract(abstract_list):
+    decoded_abstract = []
+    if abstract_list is not None:
+        for word, positions in abstract_list.items():
+            for position in positions:
+                decoded_abstract.append((word, position))
+    # 对位置进行排序以还原顺序
+    decoded_abstract.sort(key=lambda x: x[1])
+    # 获取纯文本摘要
+    final_abstract = " ".join([word for word, _ in decoded_abstract])
+    return final_abstract

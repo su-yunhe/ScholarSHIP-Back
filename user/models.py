@@ -45,8 +45,11 @@ class Star(models.Model):
     user_id = models.IntegerField(default="0")
     label_id = models.IntegerField(default="0")
     article_id = models.TextField(default="")
-    time = models.DateTimeField(default="")
+    time = models.CharField(max_length=128, default="")
     isDelete = models.BooleanField(default=False)
+    title = models.TextField(default="")
+    content = models.TextField(default="")
+    cite_count = models.CharField(max_length=128, default="")
 
     class Meta:
         db_table = "user_star"
@@ -62,3 +65,9 @@ class History(models.Model):
 
     class Meta:
         db_table = "user_browse_history"
+
+
+class ArticleAuthor(models.Model):
+    id = models.AutoField(primary_key=True)
+    article_id = models.CharField(max_length=128, default="")
+    scholar_name = models.CharField(max_length=128, default="")

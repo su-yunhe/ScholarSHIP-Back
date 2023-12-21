@@ -163,3 +163,24 @@ def apply_modify_condition(request):
         return JsonResponse({"error": 0, "msg": "申请审核通过"})
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def apply_refuse_condition(request):
+    if request.method == "POST":
+        id = request.POST.get("id")
+        results = Application.objects.get(id=id)
+        results.status = False
+        results.save()
+        return JsonResponse({"error": 0, "msg": "已拒绝申请"})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def get_all_apply(request):
+    if request.method == "POST":
+        results = list(Application.objects.values())
+        return JsonResponse({"error": 0, "msg": "获取所有申请成功", "results": results})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
