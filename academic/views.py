@@ -14,7 +14,7 @@ from datetime import datetime
 def get_works(request):
     author_id = request.GET.get('author_id')
     status = request.GET.get('status')
-    response = requests.get(f'https://api.openalex.org/works?filter=authorships.author.id:{author_id}&select=authorships,cited_by_count,display_name,doi,id,language,publication_date')
+    response = requests.get(f'https://api.openalex.org/works?filter=authorships.author.id:{author_id}&select=abstract_inverted_index, authorships,cited_by_count,display_name,doi,id,language,publication_date')
     articles = response.json().get('results')
     # print(articles)
     unbanned_articles = []
@@ -32,6 +32,15 @@ def get_works(request):
         article["authors"] = authors
         article["institution"] = institution
         article.pop("authorships")
+
+        abstract_words = article.get('abstract_inverted_index')
+        if abstract_words is not None:
+            abstract = []
+            for word in abstract_words:
+                for num in abstract_words.get(word):
+                    abstract.insert(num, word)
+            article["abstract"] = ' '.join(abstract)
+            article.pop('abstract_inverted_index')
 
         if Ban.objects.filter(work_id=article.get('id').split('/')[-1]).exists():
             banned_articles.append(article)
