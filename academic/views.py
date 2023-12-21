@@ -142,7 +142,8 @@ def get_referenced_related(request):
         ref = ref.split('/')[-1]
         response = requests.get(f'https://api.openalex.org/{ref}/?select=title')
         data = response.json()
-        referenced.append(data.get('title'))
+        if data.get('title') != "Deleted Work":
+            referenced.append({"id": ref, "title": data.get('title')})
     article["referenced_works"] = referenced
 
     related = []
@@ -150,7 +151,8 @@ def get_referenced_related(request):
         rel = rel.split('/')[-1]
         response = requests.get(f'https://api.openalex.org/{rel}/?select=title')
         data = response.json()
-        related.append(data.get('title'))
+        if data.get('title') != "Deleted Work":
+            related.append({"id": rel, "title": data.get('title')})
     article["related_works"] = related
     return JsonResponse({"data": {"error": 0, "result": article}})
 
