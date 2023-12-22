@@ -129,6 +129,66 @@ def get_site_num(request):
     return JsonResponse({"data1": data1, "data2": data2})
 
 
+@csrf_exempt
+def single_work_analysis(request):
+    workid = request.POST.get("workId")
+    count1 = 0
+    count2 = 0
+    url = (
+        work_url
+        + "/"
+        + workid
+        + "?select=cited_by_count,institutions_distinct_count,referenced_works,related_works,keywords,authorships,concepts,corresponding_institution_ids,counts_by_year"
+    )
+    print(url)
+    data = requests.get(url)
+    data1 = data.json()
+    for obj in data1["referenced_works"]:
+        count1 = count1 + 1
+    for obj in data1["related_works"]:
+        count2 = count2 + 1
+    data1["reference_count"] = count1
+    data1["related_count"] = count2
+    authors_list = [authorship.get("author", {}) for authorship in data1["authorships"]]
+    data1["authorships"] = authors_list
+    return JsonResponse({"data1": data1})
+
+
+@csrf_exempt
+def muti_work_analysis(request):
+    workid = request.POST.get("workId")
+    workid = str(workid)
+    workid = workid.split(",")
+    str_temp = ""
+    for i in workid:
+        str_temp += i + "|"
+    str_temp = str_temp[0 : len(str_temp) - 1]
+    count1 = 0
+    count2 = 0
+    url = (
+        work_url
+        + "?filter=openalex:"
+        + str_temp
+        + "&select=cited_by_count,institutions_distinct_count,referenced_works,related_works,keywords,authorships,concepts,corresponding_institution_ids,counts_by_year"
+    )
+    data = requests.get(url)
+    data1 = data.json()["results"]
+    for obj in data1:
+        for xfy in obj["referenced_works"]:
+            count1 = count1 + 1
+        for xfy in obj["related_works"]:
+            count2 = count2 + 1
+        obj["reference_count"] = count1
+        count1 = 0
+        obj["related_count"] = count2
+        count2 = 0
+        authors_list = [
+            authorship.get("author", {}) for authorship in obj["authorships"]
+        ]
+        obj["authorships"] = authors_list
+    return JsonResponse({"data1": data1})
+
+
 # 机构部分
 @csrf_exempt
 def get_institution_basic(request):
