@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/ScholarSHIP.iml" filepath="$PROJECT_DIR$/.idea/ScholarSHIP.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/ScholarSHIP-Back.iml" filepath="$PROJECT_DIR$/.idea/ScholarSHIP-Back.iml" />
     </modules>
   </component>
 </project>
