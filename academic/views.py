@@ -14,8 +14,16 @@ from datetime import datetime
 def get_works(request):
     author_id = request.GET.get('author_id')
     status = request.GET.get('status')
-    response = requests.get(f'https://api.openalex.org/works?filter=authorships.author.id:{author_id}&select=abstract_inverted_index, authorships,cited_by_count,display_name,doi,id,language,publication_date')
-    articles = response.json().get('results')
+    page = 1
+    articles = []
+
+    while True:
+        response = requests.get(f'https://api.openalex.org/works?filter=authorships.author.id:{author_id}&per_page=50&page={page}&select=abstract_inverted_index,authorships,cited_by_count,display_name,doi,id,language,publication_date')
+        page += 1
+        results = response.json().get('results')
+        if len(results) == 0:
+            break
+        articles += response.json().get('results')
     # print(articles)
     unbanned_articles = []
     banned_articles = []
@@ -47,7 +55,7 @@ def get_works(request):
         else:
             unbanned_articles.append(article)
     return_articles = unbanned_articles if status == "true" else banned_articles
-    return JsonResponse({"data": {"error": 0, "result": return_articles}})
+    return JsonResponse({"error": 0, "result": return_articles})
 
 
 @csrf_exempt
@@ -84,7 +92,7 @@ def get_detail(request):
         article["abstract"] = ' '.join(abstract)
         article.pop('abstract_inverted_index')
 
-    return JsonResponse({"data": {"error": 0, "result": article}})
+    return JsonResponse({"error": 0, "result": article})
 # @csrf_exempt
 # @require_http_methods(['GET'])
 # def get_detail(request):
@@ -154,7 +162,7 @@ def get_referenced_related(request):
         if data.get('title') != "Deleted Work":
             related.append({"id": rel, "title": data.get('title')})
     article["related_works"] = related
-    return JsonResponse({"data": {"error": 0, "result": article}})
+    return JsonResponse({"error": 0, "result": article})
 
 
 @csrf_exempt
@@ -170,7 +178,7 @@ def change_status(request):
         authors = [author.get("author").get("id").split('/')[-1] for author in authors]
         Ban.objects.create(work_id=work_id, author_id=authors)
 
-    return JsonResponse({"data": {"error": 0}})
+    return JsonResponse({"error": 0})
 
 
 @csrf_exempt
@@ -179,7 +187,7 @@ def get_relation_map(request):
     root_id = request.GET.get('root_id')
     result_json = get_relation(root_id)
 
-    return JsonResponse({"data": {"error": 0, "result": result_json}})
+    return JsonResponse({"error": 0, "result": result_json})
 
 
 def get_relation(root_id):
@@ -199,7 +207,14 @@ def get_relation(root_id):
         for i in range(len(authors)):
             author = authors[i]
             for j in range(i + 1, len(authors)):
+                inRes = False
                 to_author = authors[j]
+                for lin in result_lines:
+                    if (lin.get("from") == author.get('id') and lin.get("to") == to_author.get('id')) or (lin.get("from") == to_author.get('id') and lin.get("to") == author.get('id')):
+                        inRes = True
+                        break
+                if inRes:
+                    continue
                 result_lines.append({
                     "from": author.get('id'),
                     "to": to_author.get('id'),
@@ -213,7 +228,7 @@ def get_relation(root_id):
             if author_json not in result_authors:
                 result_authors.append(author_json)
 
-    return {"data": {'root_id': root_id, 'nodes': result_authors, 'lines': result_lines}}
+    return {'root_id': root_id, 'nodes': result_authors, 'lines': result_lines}
 
 
 def generate_ieee_citation(paper_data):
@@ -426,6 +441,6 @@ def get_citation(request):
     else:
         citation_result = "type error"
 
-    return JsonResponse({"data": {"error": 0, "result": citation_result}})
+    return JsonResponse({"error": 0, "result": citation_result})
 
 
