@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="42adca52-20f4-43ba-a092-fd0f1f6fe549" name="变更" comment="" />
+    <list default="true" id="42adca52-20f4-43ba-a092-fd0f1f6fe549" name="变更" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/ScholarSHIP.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ScholarSHIP.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/academic/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/academic/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/author/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/author/views.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -104,6 +110,7 @@
       <workItem from="1703143340451" duration="1932000" />
       <workItem from="1703148783089" duration="63000" />
       <workItem from="1703149516395" duration="757000" />
+      <workItem from="1703210785825" duration="2829000" />
     </task>
     <servers />
   </component>
