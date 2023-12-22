@@ -108,7 +108,6 @@ def get_scholar(request):
             h_index = author['summary_stats']['h_index']
 
             return JsonResponse({
-                'data': {
                     'error': 0,
                     'msg': 'success',
                     'data': {
@@ -119,8 +118,7 @@ def get_scholar(request):
                         'citation': citations,
                         'hIndex': h_index,
                     }
-                }
-            })
+                })
         else:
             print(f"Error: {response.status_code} - {response.text}")
             return JsonResponse({'error': response.text, 'msg': "调用openAlex接口失败"})
@@ -335,12 +333,10 @@ def get_scholar_papers(request):
                         })
                 return JsonResponse(
                     {
-                        'data': {
-                            'error': 0,
-                            'msg': '查询成功',
-                            'Num': num,
-                            'papers': works
-                        }
+                        'error': 0,
+                        'msg': '查询成功',
+                        'Num': num,
+                        'papers': works
                     })
             else:
                 # 处理错误
