@@ -14,8 +14,16 @@ from datetime import datetime
 def get_works(request):
     author_id = request.GET.get('author_id')
     status = request.GET.get('status')
-    response = requests.get(f'https://api.openalex.org/works?filter=authorships.author.id:{author_id}&select=abstract_inverted_index, authorships,cited_by_count,display_name,doi,id,language,publication_date')
-    articles = response.json().get('results')
+    page = 1
+    articles = []
+
+    while True:
+        response = requests.get(f'https://api.openalex.org/works?filter=authorships.author.id:{author_id}&per_page=50&page={page}&select=abstract_inverted_index,authorships,cited_by_count,display_name,doi,id,language,publication_date')
+        page += 1
+        results = response.json().get('results')
+        if len(results) == 0:
+            break
+        articles += response.json().get('results')
     # print(articles)
     unbanned_articles = []
     banned_articles = []
@@ -199,7 +207,14 @@ def get_relation(root_id):
         for i in range(len(authors)):
             author = authors[i]
             for j in range(i + 1, len(authors)):
+                inRes = False
                 to_author = authors[j]
+                for lin in result_lines:
+                    if (lin.get("from") == author.get('id') and lin.get("to") == to_author.get('id')) or (lin.get("from") == to_author.get('id') and lin.get("to") == author.get('id')):
+                        inRes = True
+                        break
+                if inRes:
+                    continue
                 result_lines.append({
                     "from": author.get('id'),
                     "to": to_author.get('id'),
