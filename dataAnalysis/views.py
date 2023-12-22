@@ -218,7 +218,7 @@ def get_institution_basic(request):
     print(url3)
     data4 = requests.get(url3)
     data4 = data4.json()["results"][:20]
-    name_list = [{"name": item["display_name"]} for item in data4]
+    name_list = [{"name": item["display_name"], "id": item["id"]} for item in data4]
 
     url4 = institution_url + "/" + insid + "?select=homepage_url"
     print(url4)
