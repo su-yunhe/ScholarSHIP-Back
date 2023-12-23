@@ -57,7 +57,7 @@ def get_works(request):
         else:
             unbanned_articles.append(article)
     return_articles = unbanned_articles if status == "true" else banned_articles
-    return JsonResponse({"data": {"error": 0, "result": return_articles}})
+    return JsonResponse({"error": 0, "result": return_articles})
 
 
 @csrf_exempt
