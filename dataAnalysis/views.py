@@ -78,7 +78,7 @@ def get_author_college(request):
     id_and_name_list = [
         {"id": item["id"], "name": item["display_name"]} for item in data1
     ]
-    return JsonResponse({"data": id_and_name_list})
+    return JsonResponse({"error": 0, "msg": "成功!", "data": id_and_name_list})
 
 
 @csrf_exempt
@@ -108,7 +108,7 @@ def get_author_partner(request):
                 final_list.append(obj)
         # print(authors_list)
 
-    return JsonResponse({"data": final_list})
+    return JsonResponse({"error": 0, "msg": "成功!", "data": final_list})
 
 
 # 学术成果部分
@@ -126,7 +126,9 @@ def get_site_num(request):
     print(url1)
     data2 = requests.get(url1)
     data2 = data2.json()["counts_by_year"]
-    return JsonResponse({"data1": data1, "data2": data2})
+    return JsonResponse(
+        {"error": 0, "msg": "成功!", "data": {"data1": data1, "data2": data2}}
+    )
 
 
 @csrf_exempt
@@ -151,7 +153,7 @@ def single_work_analysis(request):
     data1["related_count"] = count2
     authors_list = [authorship.get("author", {}) for authorship in data1["authorships"]]
     data1["authorships"] = authors_list
-    return JsonResponse({"data1": data1})
+    return JsonResponse({"error": 0, "msg": "成功!", "data": data1})
 
 
 @csrf_exempt
@@ -186,7 +188,7 @@ def muti_work_analysis(request):
             authorship.get("author", {}) for authorship in obj["authorships"]
         ]
         obj["authorships"] = authors_list
-    return JsonResponse({"data1": data1})
+    return JsonResponse({"error": 0, "msg": "成功!", "data": data1})
 
 
 # 机构部分
@@ -227,11 +229,15 @@ def get_institution_basic(request):
 
     return JsonResponse(
         {
-            "work_cout": data1,
-            "cite_cout": data2,
-            "author_count": data3,
-            "authors": name_list,
-            "homepage_url": data5,
+            "error": 0,
+            "msg": "成功!",
+            "data": {
+                "work_cout": data1,
+                "cite_cout": data2,
+                "author_count": data3,
+                "authors": name_list,
+                "homepage_url": data5,
+            },
         }
     )
 
@@ -266,9 +272,13 @@ def get_institution_range(request):
     ]
     return JsonResponse(
         {
-            "cited_by_count": year_and_cites_list,
-            "works_count": year_and_work_list,
-            "score": name_and_score_list,
+            "error": 0,
+            "msg": "成功!",
+            "data": {
+                "cited_by_count": year_and_cites_list,
+                "works_count": year_and_work_list,
+                "score": name_and_score_list,
+            },
         }
     )
 
@@ -295,4 +305,4 @@ def get_institution_authors(request):
         }
         for item in data4
     ]
-    return JsonResponse({"authors": name_list})
+    return JsonResponse({"error": 0, "msg": "成功!", "data": name_list})

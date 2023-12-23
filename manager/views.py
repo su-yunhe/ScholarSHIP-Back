@@ -117,7 +117,7 @@ def login(request):
 def get_all_user(request):
     if request.method == "POST":
         results = list(User.objects.values())
-        return JsonResponse({"error": 0, "msg": "获取所有用户成功", "results": results})
+        return JsonResponse({"error": 0, "msg": "获取所有用户成功", "data": results})
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
 
@@ -128,7 +128,7 @@ def get_single_user(request):
         userid = request.POST.get("id")
         # print(fileid)
         results = list(User.objects.filter(id=userid).values())
-        return JsonResponse({"error": 0, "msg": "获取该用户成功", "results": results})
+        return JsonResponse({"error": 0, "msg": "获取该用户成功", "data": results})
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
 
@@ -181,6 +181,6 @@ def apply_refuse_condition(request):
 def get_all_apply(request):
     if request.method == "POST":
         results = list(Application.objects.values())
-        return JsonResponse({"error": 0, "msg": "获取所有申请成功", "results": results})
+        return JsonResponse({"error": 0, "msg": "获取所有申请成功", "data": results})
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
