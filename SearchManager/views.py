@@ -1,8 +1,10 @@
-from elasticsearch import Elasticsearch
+import aiohttp
+import asyncio
 import requests
+from asgiref.sync import sync_to_async
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-# es = Elasticsearch([{"host": "http://119.3.252.71", "port": 9200}])  # 连接ES的主机IP和端口号
+
 base_url = "https://api.openalex.org/"
 
 
@@ -50,7 +52,7 @@ def SearchWork(request):
                        "author": authors,
                        "cite": cite, "date": date, "keywords": words, "source": source}
         result_list.append(result_dict)
-    return JsonResponse({'count': data["meta"]["count"], 'data': result_list})
+    return JsonResponse({'count': data["meta"]["count"], 'data': result_list, 'error': 0})
 
 
 # 开始界面的学者初始查找
@@ -75,7 +77,7 @@ def SearchAuthor(request):
         result_dict = {"id": author_id, "name": author_name, "cite": cited_by_count, "works_count": works_count,
                        "institution": institution, "concept": concept}
         result_list.append(result_dict)
-    return JsonResponse({'data': result_list})
+    return JsonResponse({'data': result_list, 'error': 0})
 
 
 # 开始界面的机构初始查找
@@ -102,9 +104,10 @@ def SearchInstitution(request):
                 concept_list.append(item["x_concepts"][1]["display_name"])
             if item["x_concepts"][2]["display_name"]:
                 concept_list.append(item["x_concepts"][2]["display_name"])
-        result_dict = {"id": institution_id, "name": institution_name, "country": country, "city": city, "cite": cited_by_count, "works_count": works_count, "concept": concept_list}
+        result_dict = {"id": institution_id, "name": institution_name, "country": country, "city": city,
+                       "cite": cited_by_count, "works_count": works_count, "concept": concept_list}
         result_list.append(result_dict)
-    return JsonResponse({'data': result_list})
+    return JsonResponse({'data': result_list, 'error': 0})
 
 
 # 获取前十名作者
@@ -120,7 +123,7 @@ def getTopAuthor(request):
         count = item["count"]
         author = {"name": author_name, "count": count}
         author_list.append(author)
-    return JsonResponse({'top_author': author_list})
+    return JsonResponse({'top_author': author_list, 'error': 0})
 
 
 # 获取前十名机构
@@ -135,7 +138,7 @@ def getTopInstitution(request):
         count = item["count"]
         institution = {"name": institution_name, "count": count}
         institution_list.append(institution)
-    return JsonResponse({'top_institution': institution_list})
+    return JsonResponse({'top_institution': institution_list, 'error': 0})
 
 
 # 获取前十名概念
@@ -150,7 +153,7 @@ def getTopConcept(request):
         count = item["count"]
         concept = {"name": concept_name, "count": count}
         concept_list.append(concept)
-    return JsonResponse({'top_concept': concept_list})
+    return JsonResponse({'top_concept': concept_list, 'error': 0})
 
 
 # 获取纯文本摘要
@@ -168,29 +171,70 @@ def getAbstract(abstract_list):
     return final_abstract
 
 
-# 高级检索
-@csrf_exempt
-def AdvancedSearchWork(request):
-    print(1)
-    es = Elasticsearch("http://119.3.252.71:9200")
-    result = es.search(index='', body={'query': {'match_all': {}}})
-    print(result)
-    # display_name, title, publication_year
-    # form_data = request.POST.get('formdata')
-    # min_year = form_data["minyear"], max_year = form_data["maxyear"]
-    # keyword = form_data["keyword"]
-    # method = keyword["method"], type = keyword["type"], op = keyword["op"], keyword = keyword["keyword"]
-    # url_author = base_url + "authors?filter=display_name.search:Kevin&select=id&per-page=50"
+# # 高级检索
+# @csrf_exempt
+# async def AdvancedSearchWork(request):  # op = 0 , op=1 且，op=2 或，op=3非 #type:1、2、3、4对应title、author、机构、概念
+#     print(1)
+#     search_list = [{"op": 0, "type": 1, "name": "software"},
+#                    {"op": 1, "type": 3, "name": "Beihang University"},
+#                    {"op": 2, "type": 3, "name": "Peking University"},
+#                    {"op": 0, "type": 4, "name": "software"}, ]
+#
+#     title_list = []
+#     for item in search_list:
+#         url_institution = []
+#         url_author = []
+#         url_concept = []
+#         op = item["op"]
+#         type = item["type"]
+#         name = item["name"]
+#         if type == 1:
+#             title_list.append(name)
+#         elif type == 2:
+#
+#     work_name = "software"
+#     author_name = "Tom"
+#     institution_name = "Beihang University"
+#     concept_name = "artificial"
+#
+#     url_institution = base_url + "institutions?search=" + institution_name + "&select=id&per-page=50"
+#     url_author = base_url + "authors?search=" + author_name + "&select=id&per-page=50"
+#     url_concept = base_url + "concepts?search=" + concept_name + "&select=id&per-page=1"
+#
+#     tasks = [fetch_data(url_institution), fetch_data(url_author)]
+#     data1, data2 = await asyncio.gather(*tasks)
+
+    # 拼接institution部分
+    # data_institution = requests.get(url_institution).json()
+    # institution_list = data_institution["results"]
+    # url_institution = ",institution.id:"
+    # for item in institution_list:
+    #     index_of_last_slash = item["id"].rfind('/')
+    #     institution_id = item["id"][index_of_last_slash + 1:]
+    #     url_institution += institution_id + "|"
+    # url_institution = url_institution[:-1]
+    #
+    # # 拼接author部分
     # data_author = requests.get(url_author).json()
     # author_list = data_author["results"]
-    # url = base_url + "works?filter=title.search:software,authorships.author.id:"
+    # url_author = ",authorships.author.id:"
     # for item in author_list:
-    #     author_id = item["id"]
-    #     url += author_id + "|"
-    # url = url[:-1]
+    #     index_of_last_slash = item["id"].rfind('/')
+    #     author_id = item["id"][index_of_last_slash + 1:]
+    #     url_author += author_id + "|"
+    # url_author = url_author[:-1]
+    #
+    # # 拼接url进行搜索
+    # url = base_url + "works?filter=title.search:" + work_name + url_institution + url_author
     # print(url)
     # data = requests.get(url).json()
     # return JsonResponse({'data': data})
+
+
+async def fetch_data(url):
+    async with aiohttp.ClientSession() as client:
+        async with client.get(url) as response:
+            return await response.json()
 
 
 # 获取文献原地址
@@ -203,7 +247,7 @@ def getWorkLocation(request):
     if data["primary_location"]:
         if data["primary_location"]["landing_page_url"]:
             location = data["primary_location"]["landing_page_url"]
-    return JsonResponse({'data': location})
+    return JsonResponse({'data': location, 'error': 0})
 
 
 # 获取pdf下载地址
@@ -216,5 +260,4 @@ def DownloadWork(request):
     if data["primary_location"]:
         if data["primary_location"]["pdf_url"]:
             location = data["primary_location"]["pdf_url"]
-    return JsonResponse({'data': location})
-
+    return JsonResponse({'data': location, 'error': 0})
