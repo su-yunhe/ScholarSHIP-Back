@@ -1,0 +1,77 @@
+Index: requirements.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>asgiref==3.7.2\r\nDjango==3.1.3\r\nmysqlclient==2.2.0\r\npytz==2023.3.post1\r\nsqlparse==0.4.4\r\ntyping_extensions==4.8.0\r\nrequests~=2.31.0\r\nPyMySQL~=1.0.3
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-16LE
+===================================================================
+diff --git a/requirements.txt b/requirements.txt
+--- a/requirements.txt	
++++ b/requirements.txt	
+@@ -5,4 +5,5 @@
+ sqlparse==0.4.4
+ typing_extensions==4.8.0
+ requests~=2.31.0
+-PyMySQL~=1.0.3
+\ No newline at end of file
++PyMySQL~=1.0.3
++elasticsearch~=8.11.1
+\ No newline at end of file
+Index: SearchManager/views.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import requests\r\nfrom django.http import JsonResponse\r\nfrom django.views.decorators.csrf import csrf_exempt\r\n\r\nbase_url = \"https://api.openalex.org/\"\r\n\r\n\r\n# 开始界面的文献初始查找\r\n@csrf_exempt\r\ndef SearchWork(request):\r\n    content = request.POST.get('content')\r\n    page = request.POST.get('page')\r\n    url = base_url + \"works?search=\" + content + \"&filter=from_publication_date:2000-01-01,to_publication_date:2023-12-21&sort=cited_by_count:desc&per-page=20&page=\" + page\r\n    data = requests.get(url).json()\r\n    # return JsonResponse({'data': data, 'meta': data[\"meta\"]})\r\n    result_list = []  # 用于存储结果的新列表\r\n    organization = []\r\n    # 获取所有索引结果\r\n    for item in data[\"results\"]:\r\n        authors = [], words = [], work_id = [], source = [], location = []\r\n        # 获取文件W开头的id\r\n        index_of_last_slash = item[\"id\"].rfind('/')\r\n        if index_of_last_slash != -1:\r\n            work_id = item[\"id\"][index_of_last_slash + 1:]\r\n        # 获取题目\r\n        title = item[\"title\"]\r\n        # 获取组织：机构/出版社\r\n        if item[\"primary_location\"]:\r\n            if item[\"primary_location\"][\"source\"]:\r\n                organization = item[\"primary_location\"][\"source\"][\"host_organization_name\"]\r\n                source = item[\"primary_location\"][\"source\"][\"display_name\"]\r\n        # 获取摘要、引用量、时间、关键词\r\n        abstract = getAbstract(item[\"abstract_inverted_index\"])\r\n        cite = item[\"cited_by_count\"]\r\n        date = item[\"publication_date\"]\r\n        keywords = item[\"keywords\"]\r\n        for author_item in item[\"authorships\"]:\r\n            author = author_item[\"author\"][\"display_name\"]\r\n            authors.append(author)\r\n        for keywords_item in keywords:\r\n            word = keywords_item[\"keyword\"]\r\n            words.append(word)\r\n        result_dict = {\"id\": work_id, \"title\": title, \"abstract\": abstract, \"organization\": organization,\r\n                       \"author\": authors,\r\n                       \"cite\": cite, \"date\": date, \"keywords\": words, \"source\": source}\r\n        result_list.append(result_dict)\r\n    return JsonResponse({'count': data[\"meta\"][\"count\"], 'data': result_list})\r\n\r\n\r\n# 开始界面的学者初始查找\r\n@csrf_exempt\r\ndef SearchAuthor(request):\r\n    name = request.POST.get('name')\r\n    page = request.POST.get(\"page\")\r\n    url = base_url + \"authors?search=\" + name + \"&sort=cited_by_count:desc&per-page=20&page=\" + page\r\n    data = requests.get(url).json()\r\n    result_list = []\r\n    for item in data[\"results\"]:\r\n        index_of_last_slash = item[\"id\"].rfind('/')\r\n        author_id = item[\"id\"][index_of_last_slash + 1:]\r\n        author_name = item[\"display_name\"]\r\n        works_count = item[\"works_count\"]\r\n        cited_by_count = item[\"cited_by_count\"]\r\n        institution = None\r\n        if item[\"last_known_institution\"]:\r\n            if item[\"last_known_institution\"][\"display_name\"]:\r\n                institution = item[\"last_known_institution\"][\"display_name\"]\r\n        concept = item[\"x_concepts\"][0][\"display_name\"]\r\n        result_dict = {\"id\": author_id, \"name\": author_name, \"cite\": cited_by_count, \"works_count\": works_count,\r\n                       \"institution\": institution, \"concept\": concept}\r\n        result_list.append(result_dict)\r\n    return JsonResponse({'data': result_list})\r\n\r\n\r\n# 开始界面的机构初始查找\r\n@csrf_exempt\r\ndef SearchInstitution(request):\r\n    name = request.POST.get('name')\r\n    page = request.POST.get(\"page\")\r\n    url = base_url + \"institutions?search=\" + name + \"&sort=works_count:desc&per-page=20&page=\" + page\r\n    data = requests.get(url).json()\r\n    result_list = []\r\n    for item in data[\"results\"]:\r\n        concept_list = []\r\n        index_of_last_slash = item[\"id\"].rfind('/')\r\n        institution_id = item[\"id\"][index_of_last_slash + 1:]\r\n        institution_name = item[\"display_name\"]\r\n        country = item[\"geo\"][\"country\"]\r\n        city = item[\"geo\"][\"city\"]\r\n        works_count = item[\"works_count\"]\r\n        cited_by_count = item[\"cited_by_count\"]\r\n        if item[\"x_concepts\"]:\r\n            if item[\"x_concepts\"][0][\"display_name\"]:\r\n                concept_list.append(item[\"x_concepts\"][0][\"display_name\"])\r\n            if item[\"x_concepts\"][1][\"display_name\"]:\r\n                concept_list.append(item[\"x_concepts\"][1][\"display_name\"])\r\n            if item[\"x_concepts\"][2][\"display_name\"]:\r\n                concept_list.append(item[\"x_concepts\"][2][\"display_name\"])\r\n        result_dict = {\"id\": institution_id, \"name\": institution_name, \"country\": country, \"city\": city, \"cite\": cited_by_count, \"works_count\": works_count, \"concept\": concept_list}\r\n        result_list.append(result_dict)\r\n    return JsonResponse({'data': result_list})\r\n\r\n\r\n# 获取前十名作者\r\n@csrf_exempt\r\ndef getTopAuthor(request):\r\n    content = request.POST.get('content')\r\n    url = base_url + \"works?filter=title.search:\" + content + \"&group_by=author.id&sort=count:desc&per-page=11\"\r\n    data = requests.get(url).json()\r\n    # 获取前十名作者\r\n    author_list = []\r\n    for item in data[\"group_by\"]:\r\n        author_name = item[\"key_display_name\"]\r\n        count = item[\"count\"]\r\n        author = {\"name\": author_name, \"count\": count}\r\n        author_list.append(author)\r\n    return JsonResponse({'top_author': author_list})\r\n\r\n\r\n# 获取前十名机构\r\n@csrf_exempt\r\ndef getTopInstitution(request):\r\n    content = request.POST.get('content')\r\n    url = base_url + \"works?filter=title.search:\" + content + \"&group_by=institution.id&sort=count:desc&per-page=10\"\r\n    data = requests.get(url).json()\r\n    institution_list = []\r\n    for item in data[\"group_by\"]:\r\n        institution_name = item[\"key_display_name\"]\r\n        count = item[\"count\"]\r\n        institution = {\"name\": institution_name, \"count\": count}\r\n        institution_list.append(institution)\r\n    return JsonResponse({'top_institution': institution_list})\r\n\r\n\r\n# 获取前十名概念\r\n@csrf_exempt\r\ndef getTopConcept(request):\r\n    content = request.POST.get('content')\r\n    url = base_url + \"works?filter=title.search:\" + content + \"&group_by=concepts.id&sort=count:desc&per-page=10\"\r\n    data = requests.get(url).json()\r\n    concept_list = []\r\n    for item in data[\"group_by\"]:\r\n        concept_name = item[\"key_display_name\"]\r\n        count = item[\"count\"]\r\n        concept = {\"name\": concept_name, \"count\": count}\r\n        concept_list.append(concept)\r\n    return JsonResponse({'top_concept': concept_list})\r\n\r\n\r\n# 获取纯文本摘要\r\n@csrf_exempt\r\ndef getAbstract(abstract_list):\r\n    decoded_abstract = []\r\n    if abstract_list is not None:\r\n        for word, positions in abstract_list.items():\r\n            for position in positions:\r\n                decoded_abstract.append((word, position))\r\n    # 对位置进行排序以还原顺序\r\n    decoded_abstract.sort(key=lambda x: x[1])\r\n    # 获取纯文本摘要\r\n    final_abstract = ' '.join([word for word, _ in decoded_abstract])\r\n    return final_abstract\r\n\r\n\r\n# 高级检索\r\n@csrf_exempt\r\ndef AdvancedSearchWork(request):\r\n    # display_name, title, publication_year\r\n    # form_data = request.POST.get('formdata')\r\n    # min_year = form_data[\"minyear\"], max_year = form_data[\"maxyear\"]\r\n    # keyword = form_data[\"keyword\"]\r\n    # method = keyword[\"method\"], type = keyword[\"type\"], op = keyword[\"op\"], keyword = keyword[\"keyword\"]\r\n    url_author = base_url + \"authors?filter=display_name.search:Kevin&select=id&per-page=50\"\r\n    data_author = requests.get(url_author).json()\r\n    author_list = data_author[\"results\"]\r\n    url = base_url + \"works?filter=title.search:software,authorships.author.id:\"\r\n    for item in author_list:\r\n        author_id = item[\"id\"]\r\n        url += author_id + \"|\"\r\n    url = url[:-1]\r\n    print(url)\r\n    data = requests.get(url).json()\r\n    return JsonResponse({'data': data})\r\n\r\n\r\n# 获取文献原地址\r\n@csrf_exempt\r\ndef getWorkLocation(request):\r\n    work_id = request.POST.get('id')\r\n    url = base_url + \"works/\" + work_id\r\n    data = requests.get(url).json()\r\n    location = []\r\n    if data[\"primary_location\"]:\r\n        if data[\"primary_location\"][\"landing_page_url\"]:\r\n            location = data[\"primary_location\"][\"landing_page_url\"]\r\n    return JsonResponse({'data': location})\r\n\r\n\r\n# 获取pdf下载地址\r\n@csrf_exempt\r\ndef DownloadWork(request):\r\n    work_id = request.POST.get('id')\r\n    url = base_url + \"works/\" + work_id\r\n    data = requests.get(url).json()\r\n    location = []\r\n    if data[\"primary_location\"]:\r\n        if data[\"primary_location\"][\"pdf_url\"]:\r\n            location = data[\"primary_location\"][\"pdf_url\"]\r\n    return JsonResponse({'data': location})\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/SearchManager/views.py b/SearchManager/views.py
+--- a/SearchManager/views.py	
++++ b/SearchManager/views.py	
+@@ -1,7 +1,8 @@
++from elasticsearch import Elasticsearch
+ import requests
+ from django.http import JsonResponse
+ from django.views.decorators.csrf import csrf_exempt
+-
++# es = Elasticsearch([{"host": "http://119.3.252.71", "port": 9200}])  # 连接ES的主机IP和端口号
+ base_url = "https://api.openalex.org/"
+ 
+ 
+@@ -165,22 +166,26 @@
+ # 高级检索
+ @csrf_exempt
+ def AdvancedSearchWork(request):
++    print(1)
++    es = Elasticsearch("http://119.3.252.71:9200")
++    result = es.search(index='', body={'query': {'match_all': {}}})
++    print(result)
+     # display_name, title, publication_year
+     # form_data = request.POST.get('formdata')
+     # min_year = form_data["minyear"], max_year = form_data["maxyear"]
+     # keyword = form_data["keyword"]
+     # method = keyword["method"], type = keyword["type"], op = keyword["op"], keyword = keyword["keyword"]
+-    url_author = base_url + "authors?filter=display_name.search:Kevin&select=id&per-page=50"
+-    data_author = requests.get(url_author).json()
+-    author_list = data_author["results"]
+-    url = base_url + "works?filter=title.search:software,authorships.author.id:"
+-    for item in author_list:
+-        author_id = item["id"]
+-        url += author_id + "|"
+-    url = url[:-1]
+-    print(url)
+-    data = requests.get(url).json()
+-    return JsonResponse({'data': data})
++    # url_author = base_url + "authors?filter=display_name.search:Kevin&select=id&per-page=50"
++    # data_author = requests.get(url_author).json()
++    # author_list = data_author["results"]
++    # url = base_url + "works?filter=title.search:software,authorships.author.id:"
++    # for item in author_list:
++    #     author_id = item["id"]
++    #     url += author_id + "|"
++    # url = url[:-1]
++    # print(url)
++    # data = requests.get(url).json()
++    # return JsonResponse({'data': data})
+ 
+ 
+ # 获取文献原地址
