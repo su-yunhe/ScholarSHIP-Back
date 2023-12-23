@@ -1,7 +1,8 @@
+from elasticsearch import Elasticsearch
 import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-
+# es = Elasticsearch([{"host": "http://119.3.252.71", "port": 9200}])  # 连接ES的主机IP和端口号
 base_url = "https://api.openalex.org/"
 
 
@@ -10,14 +11,19 @@ base_url = "https://api.openalex.org/"
 def SearchWork(request):
     content = request.POST.get('content')
     page = request.POST.get('page')
-    url = base_url + "works?search=" + content + "&filter=from_publication_date:2000-01-01,to_publication_date:2023-12-21&sort=cited_by_count:desc&per-page=20&page=" + page
+    url = base_url + "works?search=" + content + "&filter=from_publication_date:2000-01-01,to_publication_date:" \
+                                                 "2023-12-21&sort=cited_by_count:desc&per-page=20&page=" + page
     data = requests.get(url).json()
     # return JsonResponse({'data': data, 'meta': data["meta"]})
     result_list = []  # 用于存储结果的新列表
     organization = []
     # 获取所有索引结果
     for item in data["results"]:
-        authors = [], words = [], work_id = [], source = [], location = []
+        authors = []
+        words = []
+        work_id = []
+        source = []
+        location = []
         # 获取文件W开头的id
         index_of_last_slash = item["id"].rfind('/')
         if index_of_last_slash != -1:
@@ -165,22 +171,26 @@ def getAbstract(abstract_list):
 # 高级检索
 @csrf_exempt
 def AdvancedSearchWork(request):
+    print(1)
+    es = Elasticsearch("http://119.3.252.71:9200")
+    result = es.search(index='', body={'query': {'match_all': {}}})
+    print(result)
     # display_name, title, publication_year
     # form_data = request.POST.get('formdata')
     # min_year = form_data["minyear"], max_year = form_data["maxyear"]
     # keyword = form_data["keyword"]
     # method = keyword["method"], type = keyword["type"], op = keyword["op"], keyword = keyword["keyword"]
-    url_author = base_url + "authors?filter=display_name.search:Kevin&select=id&per-page=50"
-    data_author = requests.get(url_author).json()
-    author_list = data_author["results"]
-    url = base_url + "works?filter=title.search:software,authorships.author.id:"
-    for item in author_list:
-        author_id = item["id"]
-        url += author_id + "|"
-    url = url[:-1]
-    print(url)
-    data = requests.get(url).json()
-    return JsonResponse({'data': data})
+    # url_author = base_url + "authors?filter=display_name.search:Kevin&select=id&per-page=50"
+    # data_author = requests.get(url_author).json()
+    # author_list = data_author["results"]
+    # url = base_url + "works?filter=title.search:software,authorships.author.id:"
+    # for item in author_list:
+    #     author_id = item["id"]
+    #     url += author_id + "|"
+    # url = url[:-1]
+    # print(url)
+    # data = requests.get(url).json()
+    # return JsonResponse({'data': data})
 
 
 # 获取文献原地址
