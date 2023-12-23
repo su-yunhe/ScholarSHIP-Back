@@ -62,6 +62,7 @@ class History(models.Model):
     real_id = models.TextField(default="")
     time = models.DateTimeField(default="")
     isDelete = models.BooleanField(default=False)
+    name = models.TextField(default="")
 
     class Meta:
         db_table = "user_browse_history"
