@@ -5,12 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="917a36c6-408c-40f2-b7c1-2a49102af4e3" name="更改" comment="">
-      <change afterPath="$PROJECT_DIR$/SearchManager/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/ScholarSHIP-Back.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ScholarSHIP-Back.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ScholarSHIP/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/ScholarSHIP/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ScholarSHIP/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/ScholarSHIP/urls.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,6 +31,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "master",
     "last_opened_file_path": "D:/pythonProject/GitProject",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -54,7 +50,6 @@
         <env name="DJANGO_SETTINGS_MODULE" value="ScholarSHIP.settings" />
       </envs>
       <option name="SDK_HOME" value="C:\Users\26771\AppData\Local\Programs\Python\Python39\python.exe" />
-      <option name="SDK_NAME" value="Python 3.9" />
       <option name="WORKING_DIRECTORY" value="" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
