@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "academic",
     "dataAnalysis",
     "author",
+    "SearchManager"
 ]
 
 MIDDLEWARE = [
