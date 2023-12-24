@@ -1,4 +1,6 @@
 import json
+import random
+
 import requests
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -199,11 +201,16 @@ def get_relation(root_id):
     results = results[:5]
     result_authors = []
     result_lines = []
+    limit = 25
     for result in results:
         article_name = result.get('title')
         authorships = result.get('authorships')
         # 获取所有的 "author"
         authors = [{"id": authorship.get('author').get('id').split('/')[-1], "name": authorship.get('author').get('display_name')} for authorship in authorships]
+        # print(len(result_authors))
+        # print(len(authors))
+        if len(result_authors) + len(authors) > limit:
+            continue
         for i in range(len(authors)):
             author = authors[i]
             for j in range(i + 1, len(authors)):

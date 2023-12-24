@@ -372,6 +372,24 @@ def history_add(request):
         new_history.real_id = real_id
         new_history.time = time
         new_history.save()
+        if type == "0":
+            # 0为机构
+            url1 = institution_url + "/" + real_id + "?select=display_name"
+            data = requests.get(url1)
+            data1 = data.json()["display_name"]
+            new_history.name = data1
+        if type == "1":
+            # 1为文章
+            url1 = work_url + "/" + real_id + "?select=display_name"
+            data = requests.get(url1)
+            data1 = data.json()["display_name"]
+            new_history.name = data1
+        if type == "2":
+            # 2为学者
+            url1 = author_url + "/" + real_id + "?select=display_name"
+            data = requests.get(url1)
+            data1 = data.json()["display_name"]
+            new_history.name = data1
         return JsonResponse({"error": 0, "msg": "添加历史记录成功"})
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
