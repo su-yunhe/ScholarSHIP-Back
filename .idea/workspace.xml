@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="917a36c6-408c-40f2-b7c1-2a49102af4e3" name="更改" comment="完成了基本的搜索接口，无高级检索">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SearchManager/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/SearchManager/views.py" afterDir="false" />
-    </list>
+    <list default="true" id="917a36c6-408c-40f2-b7c1-2a49102af4e3" name="更改" comment="初步完成了高级检索" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -88,7 +85,14 @@
       <option name="project" value="LOCAL" />
       <updated>1703303018291</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="初步完成了高级检索">
+      <created>1703388967409</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1703388967409</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -122,6 +126,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="完成了基本的搜索接口，无高级检索" />
-    <option name="LAST_COMMIT_MESSAGE" value="完成了基本的搜索接口，无高级检索" />
+    <MESSAGE value="初步完成了高级检索" />
+    <option name="LAST_COMMIT_MESSAGE" value="初步完成了高级检索" />
   </component>
 </project>
