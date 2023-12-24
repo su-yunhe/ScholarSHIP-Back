@@ -300,6 +300,7 @@ def star_add(request):
             new_link.scholar_name = obj["display_name"]
             new_link.save()
 
+
         new_star.save()
         return JsonResponse({"error": 0, "msg": "添加收藏成功", "data": authors_list})
     else:
