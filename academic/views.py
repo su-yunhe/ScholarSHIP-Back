@@ -6,6 +6,8 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from flask_restful.fields import Integer
+
 from .models import Ban
 import re
 from datetime import datetime
@@ -37,14 +39,7 @@ def get_works(request):
         authors = []
         for author in article.get('authorships'):
             authors.append(author.get('author'))
-        i = article.get('authorships')[0].get('institutions')
-        if len(i) != 0:
-            i = i[0]
-            institution = {"id": i.get('id'), "display_name": i.get('display_name')}
-        else:
-            institution = None
         article["authors"] = authors
-        article["institution"] = institution
         article.pop("authorships")
 
         abstract_words = article.get('abstract_inverted_index')
@@ -65,7 +60,6 @@ def get_works(request):
             banned_articles.append(article)
         else:
             unbanned_articles.append(article)
-    # print(12222)
     return_articles = unbanned_articles if status == "true" else banned_articles
     return JsonResponse({"error": 0, "result": return_articles})
 
@@ -75,7 +69,7 @@ def get_works(request):
 def get_works_count(request):
     author_id = request.GET.get('author_id')
     response = requests.get(f'https://api.openalex.org/authors/{author_id}/?select=works_count')
-    return JsonResponse({"error": 0, "works_count": response.json()})
+    return JsonResponse({"error": 0, "result": response.json()})
 
 
 @csrf_exempt
