@@ -6,7 +6,7 @@ urlpatterns = [
     path("SearchManager/SearchTopInstitution", getTopInstitution),
     path("SearchManager/SearchTopConcept", getTopConcept),
     path("SearchManager/AdvancedSearchWork", AdvancedSearchWork),
-    path("SearchManager/AdvancedSearchWork1", AdvancedSearchWork1),
+    # path("SearchManager/AdvancedSearchWork1", AdvancedSearchWork1),
     path("SearchManager/WorkLocation", getWorkLocation),
     path("SearchManager/DownloadWork", DownloadWork),
     path("SearchManager/SearchAuthor", SearchAuthor),

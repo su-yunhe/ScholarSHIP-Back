@@ -144,9 +144,8 @@ def get_referenced_related(request):
         if user_id not in ban_info.first().author_id:
             return JsonResponse({"error": 3001, "msg": "未找到论文"})
 
-    response = requests.get(f'https://api.openalex.org/{work_id}/?select=referenced_works,related_works')
+    response = requests.get(f'https://api.openalex.org/{work_id}/?select=referenced_works,related_works,doi')
     article = response.json()
-
     referenced = []
     for ref in article.get('referenced_works'):
         ref = ref.split('/')[-1]
