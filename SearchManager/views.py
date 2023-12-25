@@ -10,19 +10,21 @@ base_url = "https://api.openalex.org/"
 # 开始界面的文献初始查找
 @csrf_exempt
 def SearchWork(request):
+    print(request.POST)
     content = request.POST.get('content')
     page = request.POST.get('page')
     url = base_url + "works?search=" + content + "&filter=from_publication_date:2000-01-01,to_publication_date:" \
                                                  "2023-12-21&sort=cited_by_count:desc&per-page=20&page=" + page
-    getWorkDetails(url)
-    result_list = getWorkDetails(url)
-    return JsonResponse({'data': result_list, 'error': 0})
+    data = requests.get(url).json()
+    count = data["meta"]["count"]
+    result_list = getWorkDetails(data)
+    return JsonResponse({'data': result_list, 'error': 0, 'count': count})
 
 
 # 开始界面的学者初始查找
 @csrf_exempt
 def SearchAuthor(request):
-    name = request.POST.get('name')
+    name = request.POST.get('content')
     page = request.POST.get("page")
     url = base_url + "authors?search=" + name + "&sort=cited_by_count:desc&per-page=20&page=" + page
     data = requests.get(url).json()
@@ -47,7 +49,7 @@ def SearchAuthor(request):
 # 开始界面的机构初始查找
 @csrf_exempt
 def SearchInstitution(request):
-    name = request.POST.get('name')
+    name = request.POST.get('content')
     page = request.POST.get("page")
     url = base_url + "institutions?search=" + name + "&sort=works_count:desc&per-page=20&page=" + page
     data = requests.get(url).json()
@@ -139,32 +141,28 @@ def getAbstract(abstract_list):
 @csrf_exempt
 def AdvancedSearchWork(request):  # op = 0是非 ,op=1  #type:1、2、3、4对应title、author、机构、概念
     print(1)
-    search = request.POST.get("search")
-    search_list = search["search_list"]
-    min_year = search["min_year"]
-    max_year = search["max_year"]
-    # search_list = [{"op": 1, "type": 2, "name": "song"},
-    #                {"op": 1, "type": 3, "name": "Peking"},
-    #                {"op": 0, "type": 3, "name": "beihang"},
-    #                {"op": 1, "type": 1, "name": "software"},
-    #                {"op": 1, "type": 4, "name": "network"}]
-    # min_year = 2000
-    # max_year = 2015
+    min_year = request.POST.get('min_year')
+    max_year = request.POST.get('max_year')
+    name_list = request.POST.getlist('name[]')
+    op_list = request.POST.getlist('op[]')
+    type_list = request.POST.getlist('type[]')
     title_list = []
     concept_list = []
     institution_list = []
     author_list = []
-    for item in search_list:
-        type = item["type"]
-        op = item["op"]
+    for op, type, name in zip(op_list, type_list, name_list):
+        op = int(op)
+        type = int(type)
         if type == 1:
-            title_list.append({"name": item["name"], "op": op})
+            print("aaa")
+            title_list.append({"name": name, "op": op})
         elif type == 2:
-            author_list.append({"name": item["name"], "op": op})
+            author_list.append({"name": name, "op": op})
         elif type == 3:
-            institution_list.append({"name": item["name"], "op": op})
+            institution_list.append({"name": name, "op": op})
         elif type == 4:
-            concept_list.append({"name": item["name"], "op": op})
+            concept_list.append({"name": name, "op": op})
+
     institution_name = ""
     author_name = ""
     concept_name = ""
@@ -180,7 +178,6 @@ def AdvancedSearchWork(request):  # op = 0是非 ,op=1  #type:1、2、3、4对�
                 institution_name += "(NOT " + "\"" + item["name"] + "\")" + " OR "
         institution_name = ' '.join(institution_name.split()[:-1])
         url_institution = base_url + "institutions?filter=display_name.search:" + institution_name + "&select=id&per-page=50"
-        print(url_institution)
         data_institution = requests.get(url_institution).json()
         institution_list = data_institution["results"]
         url_institution = ",institution.id:"
@@ -198,7 +195,7 @@ def AdvancedSearchWork(request):  # op = 0是非 ,op=1  #type:1、2、3、4对�
                 author_name += "(NOT " + "\"" + item["name"] + "\")" + " OR "
         author_name = ' '.join(author_name.split()[:-1])
         url_author = base_url + "authors?filter=display_name.search:" + author_name + "&select=id&per-page=50"
-        print(url_author)
+        print("url_author: " + url_author +'\n')
         data_author = requests.get(url_author).json()
         author_list = data_author["results"]
         url_author = ",authorships.author.id:"
@@ -232,9 +229,7 @@ def AdvancedSearchWork(request):  # op = 0是非 ,op=1  #type:1、2、3、4对�
             elif item["op"] == 0:
                 title_name += "(NOT " + "\"" + item["name"] + "\")" + " OR "
         title_name = ' '.join(title_name.split()[:-1])
-    # tasks = [fetch_data(url_institution), fetch_data(url_author), fetch_data(url_concept)]
-    # data1, data2, data3 = await asyncio.gather(*tasks)
-    # 拼接url进行搜索
+
     url = base_url + "works?filter=title.search:" + title_name
     if url_institution:
         url += url_institution
@@ -242,16 +237,10 @@ def AdvancedSearchWork(request):  # op = 0是非 ,op=1  #type:1、2、3、4对�
         url += url_author
     if url_concept:
         url += url_concept
-    url += ",publication_year:>" + str(min_year - 1) + ",publication_year:<" + str(max_year + 1)
-    print(url)
-    result_list = getWorkDetails(url)
+    url += ",publication_year:>" + str(int(min_year) - 1) + ",publication_year:<" + str(int(max_year) + 1)
+    data = requests.get(url).json()
+    result_list = getWorkDetails(data)
     return JsonResponse({'data': result_list, 'error': 0})
-
-
-# async def fetch_data(url):
-#     async with aiohttp.ClientSession() as client:
-#         async with client.get(url) as response:
-#             return await response.json()
 
 
 # 获取文献原地址
@@ -282,8 +271,7 @@ def DownloadWork(request):
 
 # 封装的函数，获取文献的详细内容
 @csrf_exempt
-def getWorkDetails(url):
-    data = requests.get(url).json()
+def getWorkDetails(data):
     result_list = []  # 用于存储结果的新列表
     for item in data["results"]:
         organization = []
@@ -317,32 +305,34 @@ def getWorkDetails(url):
                        "author": authors,
                        "cite": cite, "date": date, "keywords": words, "source": source}
         result_list.append(result_dict)
-
+    result_list.append({"count":data["meta"]["count"]})
     return result_list
 
 
 @csrf_exempt
 async def AdvancedSearchWork1(request):  # op = 0是非 ,op=1  #type:1、2、3、4对应title、author、机构、概念
     print(1)
-    search = request.POST.get("search")
-    search_list = search["search_list"]
-    min_year = search["min_year"]
-    max_year = search["max_year"]
+    min_year = request.POST.get('min_year')
+    max_year = request.POST.get('max_year')
+    name_list = request.POST.getlist('name[]')
+    op_list = request.POST.getlist('op[]')
+    type_list = request.POST.getlist('type[]')
     title_list = []
     concept_list = []
     institution_list = []
     author_list = []
-    for item in search_list:
-        type = item["type"]
-        op = item["op"]
+    for op, type, name in zip(op_list, type_list, name_list):
+        op = int(op)
+        type = int(type)
         if type == 1:
-            title_list.append({"name": item["name"], "op": op})
+            print("aaa")
+            title_list.append({"name": name, "op": op})
         elif type == 2:
-            author_list.append({"name": item["name"], "op": op})
+            author_list.append({"name": name, "op": op})
         elif type == 3:
-            institution_list.append({"name": item["name"], "op": op})
+            institution_list.append({"name": name, "op": op})
         elif type == 4:
-            concept_list.append({"name": item["name"], "op": op})
+            concept_list.append({"name": name, "op": op})
     institution_name = ""
     author_name = ""
     concept_name = ""
@@ -350,7 +340,6 @@ async def AdvancedSearchWork1(request):  # op = 0是非 ,op=1  #type:1、2、3�
     url_institution = ""
     url_author = ""
     url_concept = ""
-
     if institution_list:
         for item in institution_list:
             if item["op"] == 1:
@@ -429,9 +418,10 @@ async def AdvancedSearchWork1(request):  # op = 0是非 ,op=1  #type:1、2、3�
         url += url_author
     if url_concept:
         url += url_concept
-    url += ",publication_year:>" + str(min_year - 1) + ",publication_year:<" + str(max_year + 1)
+    url += ",publication_year:>" + str(int(min_year) - 1) + ",publication_year:<" + str(int(max_year) + 1)
     print(url)
-    result_list = getWorkDetails(url)
+    data = requests.get(url).json()
+    result_list = getWorkDetails(data)
     return JsonResponse({'data': result_list, 'error': 0})
 
 
