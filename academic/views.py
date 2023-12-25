@@ -6,6 +6,8 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from flask_restful.fields import Integer
+
 from .models import Ban
 import re
 from datetime import datetime
@@ -16,31 +18,28 @@ from datetime import datetime
 def get_works(request):
     author_id = request.GET.get('author_id')
     status = request.GET.get('status')
-    page = 1
-    articles = []
-
-    while True:
-        response = requests.get(f'https://api.openalex.org/works?filter=authorships.author.id:{author_id}&per_page=50&page={page}&select=abstract_inverted_index,authorships,cited_by_count,display_name,doi,id,language,publication_date')
-        page += 1
-        results = response.json().get('results')
-        if len(results) == 0:
-            break
-        articles += response.json().get('results')
+    count = request.GET.get('count')
+    # page = 1
+    # articles = []
+    #
+    # while True:
+    #     response = requests.get(f'https://api.openalex.org/works?filter=authorships.author.id:{author_id}&per_page=50&page={page}&select=abstract_inverted_index,authorships,cited_by_count,display_name,doi,id,language,primary_location,publication_date')
+    #     page += 1
+    #     results = response.json().get('results')
+    #     if len(results) == 0:
+    #         break
+    #     articles += response.json().get('results')
     # print(articles)
+    response = requests.get(f'https://api.openalex.org/works?filter=authorships.author.id:{author_id}&per_page=50&page={count}&select=abstract_inverted_index,authorships,cited_by_count,display_name,doi,id,language,primary_location,publication_date')
+    articles = response.json().get('results')
     unbanned_articles = []
     banned_articles = []
     for article in articles:
+        # print(article.get('display_name'))
         authors = []
         for author in article.get('authorships'):
             authors.append(author.get('author'))
-        i = article.get('authorships')[0].get('institutions')
-        if len(i) != 0:
-            i = i[0]
-            institution = {"id": i.get('id'), "display_name": i.get('display_name')}
-        else:
-            institution = None
         article["authors"] = authors
-        article["institution"] = institution
         article.pop("authorships")
 
         abstract_words = article.get('abstract_inverted_index')
@@ -52,12 +51,25 @@ def get_works(request):
             article["abstract"] = ' '.join(abstract)
             article.pop('abstract_inverted_index')
 
+        # print(article.get('primary_location').get('pdf_url'))
+        if article.get('primary_location') is not None:
+            article["pdf_url"] = article.get('primary_location').get('pdf_url')
+            article.pop("primary_location")
+
         if Ban.objects.filter(work_id=article.get('id').split('/')[-1]).exists():
             banned_articles.append(article)
         else:
             unbanned_articles.append(article)
     return_articles = unbanned_articles if status == "true" else banned_articles
     return JsonResponse({"error": 0, "result": return_articles})
+
+
+@csrf_exempt
+@require_http_methods(['GET'])
+def get_works_count(request):
+    author_id = request.GET.get('author_id')
+    response = requests.get(f'https://api.openalex.org/authors/{author_id}/?select=works_count')
+    return JsonResponse({"error": 0, "result": response.json()})
 
 
 @csrf_exempt

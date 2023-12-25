@@ -151,10 +151,10 @@ def apply_modify_condition(request):
         results = Application.objects.get(id=id)
         results.status = True
         results.save()
-        userid = request.POST.get("userid")
-        scholar_id = request.POST.get("scholar_id")
-        organization = request.POST.get("organization")
-        real_name = request.POST.get("real_name")
+        userid = results.user_id
+        scholar_id = results.scholar_id
+        organization = results.ins_name
+        real_name = results.scholar_name
         target = User.objects.get(id=userid)
         target.scholar_id = scholar_id
         target.organization = organization

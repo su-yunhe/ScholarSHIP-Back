@@ -138,9 +138,14 @@ def concern_add(request):
     if request.method == "POST":
         userid = request.POST.get("userid")
         scholar_id = request.POST.get("scholarId")
+        url = author_url + "/" + scholar_id + "?select=display_name"
+        print(url)
+        data = requests.get(url)
+        display_name = data.json()["display_name"]
         new_concern = Concern()
         new_concern.user_id = userid
         new_concern.scholar_id = scholar_id
+        new_concern.name = display_name
         new_concern.save()
         return JsonResponse({"error": 0, "msg": "添加关注成功"})
     else:
@@ -171,12 +176,27 @@ def get_all_concern(request):
         results = list(
             Concern.objects.filter(user_id=userid).filter(isDelete=0).values()
         )
-        for obj in results:
-            scholar = User.objects.get(scholar_id=obj["scholar_id"])
-            obj["scholar_name"] = scholar.real_name
-            obj["scholar_introduction"] = scholar.introduction
 
         return JsonResponse({"error": 0, "msg": "获取关注列表成功", "results": results})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+
+@csrf_exempt
+def judge_concern(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        scholarId = request.POST.get("scholarId")
+        results = (
+            Concern.objects.filter(user_id=userid)
+            .filter(scholar_id=scholarId)
+            .filter(isDelete=0)
+        )
+
+        if results.exists():
+            return JsonResponse({"error": 0, "msg": "存在", "results": results.exists()})
+        else:
+            return JsonResponse({"error": 0, "msg": "不存在", "results": results.exists()})
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
 
@@ -284,25 +304,28 @@ def star_add(request):
             + articleid
             + "?select=id,title,publication_date,cited_by_count,abstract_inverted_index"
         )
+        print(url)
         data = requests.get(url)
         data1 = data.json()
         new_star.content = getAbstract(data1["abstract_inverted_index"])
         new_star.time = data1["publication_date"]
         new_star.title = data1["title"]
         new_star.cite_count = data1["cited_by_count"]
-
         url1 = work_url + "/" + articleid + "?select=authorships"
         data = requests.get(url1)
         data1 = data.json()
         authors_list = [
             authorship.get("author", {}) for authorship in data1["authorships"]
         ]
-        for obj in authors_list:
-            new_link = ArticleAuthor()
-            new_link.article_id = articleid
-            new_link.scholar_name = obj["display_name"]
-            new_link.save()
-
+        temp = ArticleAuthor.objects.filter(article_id=articleid)
+        if temp.exists():
+            print(1)
+        else:
+            for obj in authors_list:
+                new_link = ArticleAuthor()
+                new_link.article_id = articleid
+                new_link.scholar_name = obj["display_name"]
+                new_link.save()
 
         new_star.save()
         return JsonResponse({"error": 0, "msg": "添加收藏成功", "data": authors_list})
@@ -379,25 +402,27 @@ def history_add(request):
         new_history.type = type
         new_history.real_id = real_id
         new_history.time = time
-        new_history.save()
         if type == "0":
             # 0为机构
             url1 = institution_url + "/" + real_id + "?select=display_name"
             data = requests.get(url1)
             data1 = data.json()["display_name"]
             new_history.name = data1
+            new_history.save()
         if type == "1":
             # 1为文章
             url1 = work_url + "/" + real_id + "?select=display_name"
             data = requests.get(url1)
             data1 = data.json()["display_name"]
             new_history.name = data1
+            new_history.save()
         if type == "2":
             # 2为学者
             url1 = author_url + "/" + real_id + "?select=display_name"
             data = requests.get(url1)
             data1 = data.json()["display_name"]
             new_history.name = data1
+            new_history.save()
         return JsonResponse({"error": 0, "msg": "添加历史记录成功"})
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
@@ -464,13 +489,18 @@ def apply_add(request):
         email = request.POST.get("email")
         content = request.POST.get("content")
         time = request.POST.get("time")
+        user_name = request.POST.get("username")
+        scolarname = request.POST.get("scolarname")
+        ins_name = request.POST.get("insname")
         new_apply = Application()
         new_apply.user_id = userid
         new_apply.scholar_id = scholar_id
         new_apply.email = email
         new_apply.content = content
         new_apply.time = time
-
+        new_apply.user_name = user_name
+        new_apply.scholar_name = scolarname
+        new_apply.ins_name = ins_name
         new_apply.save()
         return JsonResponse({"error": 0, "msg": "提交申请成功"})
     else:

@@ -24,6 +24,9 @@ class Application(models.Model):
     content = models.TextField(default="")
     time = models.DateTimeField(default="")
     status = models.BooleanField(default=False)
+    user_name = models.CharField(max_length=128, default="")
+    scholar_name = models.CharField(max_length=128, default="")
+    ins_name = models.TextField(default="")
 
     class Meta:
         db_table = "scholar_apply"
