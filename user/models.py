@@ -50,6 +50,8 @@ class Star(models.Model):
     title = models.TextField(default="")
     content = models.TextField(default="")
     cite_count = models.CharField(max_length=128, default="")
+    # author_name=models.CharField(max_length=128, default="")
+    # author_id=models.TextField(default="")
 
     class Meta:
         db_table = "user_star"
