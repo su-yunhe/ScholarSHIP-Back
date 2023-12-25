@@ -1,5 +1,3 @@
-import aiohttp
-import asyncio
 import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -10,7 +8,6 @@ base_url = "https://api.openalex.org/"
 # 开始界面的文献初始查找
 @csrf_exempt
 def SearchWork(request):
-    print(request.POST)
     content = request.POST.get('content')
     page = request.POST.get('page')
     url = base_url + "works?search=" + content + "&filter=from_publication_date:2000-01-01,to_publication_date:" \
@@ -141,6 +138,7 @@ def getAbstract(abstract_list):
 @csrf_exempt
 def AdvancedSearchWork(request):  # op = 0是非 ,op=1  #type:1、2、3、4对应title、author、机构、概念
     print(1)
+    page = request.POST.get("page")
     min_year = request.POST.get('min_year')
     max_year = request.POST.get('max_year')
     name_list = request.POST.getlist('name[]')
@@ -237,7 +235,7 @@ def AdvancedSearchWork(request):  # op = 0是非 ,op=1  #type:1、2、3、4对�
         url += url_author
     if url_concept:
         url += url_concept
-    url += ",publication_year:>" + str(int(min_year) - 1) + ",publication_year:<" + str(int(max_year) + 1)
+    url += ",publication_year:>" + str(int(min_year) - 1) + ",publication_year:<" + str(int(max_year) + 1) + "&per-page=50&page=" + page
     data = requests.get(url).json()
     result_list = getWorkDetails(data)
     return JsonResponse({'data': result_list, 'error': 0})
@@ -309,127 +307,132 @@ def getWorkDetails(data):
     return result_list
 
 
-@csrf_exempt
-async def AdvancedSearchWork1(request):  # op = 0是非 ,op=1  #type:1、2、3、4对应title、author、机构、概念
-    print(1)
-    min_year = request.POST.get('min_year')
-    max_year = request.POST.get('max_year')
-    name_list = request.POST.getlist('name[]')
-    op_list = request.POST.getlist('op[]')
-    type_list = request.POST.getlist('type[]')
-    title_list = []
-    concept_list = []
-    institution_list = []
-    author_list = []
-    for op, type, name in zip(op_list, type_list, name_list):
-        op = int(op)
-        type = int(type)
-        if type == 1:
-            print("aaa")
-            title_list.append({"name": name, "op": op})
-        elif type == 2:
-            author_list.append({"name": name, "op": op})
-        elif type == 3:
-            institution_list.append({"name": name, "op": op})
-        elif type == 4:
-            concept_list.append({"name": name, "op": op})
-    institution_name = ""
-    author_name = ""
-    concept_name = ""
-    title_name = ""
-    url_institution = ""
-    url_author = ""
-    url_concept = ""
-    if institution_list:
-        for item in institution_list:
-            if item["op"] == 1:
-                institution_name += "(\"" + item["name"] + "\")" + " OR "
-            elif item["op"] == 0:
-                institution_name += "(NOT " + "\"" + item["name"] + "\")" + " OR "
-        institution_name = ' '.join(institution_name.split()[:-1])
-        url_institution = base_url + "institutions?filter=display_name.search:" + institution_name + "&select=id&per-page=50"
-    if author_list:
-        for item in author_list:
-            if item["op"] == 1:
-                author_name += "(\"" + item["name"] + "\")" + " OR "
-            elif item["op"] == 0:
-                author_name += "(NOT " + "\"" + item["name"] + "\")" + " OR "
-        author_name = ' '.join(author_name.split()[:-1])
-        url_author = base_url + "authors?filter=display_name.search:" + author_name + "&select=id&per-page=50"
-    if concept_list:
-        for item in concept_list:
-            if item["op"] == 1:
-                concept_name += "(\"" + item["name"] + "\")" + " OR "
-            elif item["op"] == 0:
-                concept_name += "(NOT " + "\"" + item["name"] + "\")" + " OR "
-        concept_name = ' '.join(concept_name.split()[:-1])
-        url_concept = base_url + "concepts?filter=display_name.search:" + concept_name + "&select=id&per-page=3"
-    if title_list:
-        for item in title_list:
-            if item["op"] == 1:
-                title_name += "(\"" + item["name"] + "\")" + " OR "
-            elif item["op"] == 0:
-                title_name += "(NOT " + "\"" + item["name"] + "\")" + " OR "
-        title_name = ' '.join(title_name.split()[:-1])
+# @csrf_exempt
+# async def AdvancedSearchWork1(request):  # op = 0是非 ,op=1  #type:1、2、3、4对应title、author、机构、概念
+#     try:
+#         logging.info("Async function executed successfully.")
+#         page = request.POST.get("page")
+#         min_year = request.POST.get('min_year')
+#         max_year = request.POST.get('max_year')
+#         name_list = request.POST.getlist('name[]')
+#         op_list = request.POST.getlist('op[]')
+#         type_list = request.POST.getlist('type[]')
+#         title_list = []
+#         concept_list = []
+#         institution_list = []
+#         author_list = []
+#         for op, type, name in zip(op_list, type_list, name_list):
+#             op = int(op)
+#             type = int(type)
+#             if type == 1:
+#                 print("aaa")
+#                 title_list.append({"name": name, "op": op})
+#             elif type == 2:
+#                 author_list.append({"name": name, "op": op})
+#             elif type == 3:
+#                 institution_list.append({"name": name, "op": op})
+#             elif type == 4:
+#                 concept_list.append({"name": name, "op": op})
+#         institution_name = ""
+#         author_name = ""
+#         concept_name = ""
+#         title_name = ""
+#         url_institution = ""
+#         url_author = ""
+#         url_concept = ""
+#         if institution_list:
+#             for item in institution_list:
+#                 if item["op"] == 1:
+#                     institution_name += "(\"" + item["name"] + "\")" + " OR "
+#                 elif item["op"] == 0:
+#                     institution_name += "(NOT " + "\"" + item["name"] + "\")" + " OR "
+#             institution_name = ' '.join(institution_name.split()[:-1])
+#             url_institution = base_url + "institutions?filter=display_name.search:" + institution_name + "&select=id&per-page=50"
+#         if author_list:
+#             for item in author_list:
+#                 if item["op"] == 1:
+#                     author_name += "(\"" + item["name"] + "\")" + " OR "
+#                 elif item["op"] == 0:
+#                     author_name += "(NOT " + "\"" + item["name"] + "\")" + " OR "
+#             author_name = ' '.join(author_name.split()[:-1])
+#             url_author = base_url + "authors?filter=display_name.search:" + author_name + "&select=id&per-page=50"
+#         if concept_list:
+#             for item in concept_list:
+#                 if item["op"] == 1:
+#                     concept_name += "(\"" + item["name"] + "\")" + " OR "
+#                 elif item["op"] == 0:
+#                     concept_name += "(NOT " + "\"" + item["name"] + "\")" + " OR "
+#             concept_name = ' '.join(concept_name.split()[:-1])
+#             url_concept = base_url + "concepts?filter=display_name.search:" + concept_name + "&select=id&per-page=3"
+#         if title_list:
+#             for item in title_list:
+#                 if item["op"] == 1:
+#                     title_name += "(\"" + item["name"] + "\")" + " OR "
+#                 elif item["op"] == 0:
+#                     title_name += "(NOT " + "\"" + item["name"] + "\")" + " OR "
+#             title_name = ' '.join(title_name.split()[:-1])
+#
+#         data_institution, data_author, data_concept = await asyncio.gather(
+#             fetch_data(url_institution),
+#             fetch_data(url_author),
+#             fetch_data(url_concept)
+#         )
+#         # 处理数据可能为 None 的情况
+#         # if data_institution is None:
+#         #     data_institution = {}
+#         # if data_author is None:
+#         #     data_author = {}
+#         # if data_concept is None:
+#         #     data_concept = {}
+#
+#         if data_institution:
+#             institution_list = data_institution["results"]
+#             url_institution = ",institution.id:"
+#             for item in institution_list:
+#                 index_of_last_slash = item["id"].rfind('/')
+#                 institution_id = item["id"][index_of_last_slash + 1:]
+#                 url_institution += institution_id + "|"
+#             url_institution = url_institution[:-1]
+#         if data_author:
+#             author_list = data_author["results"]
+#             url_author = ",authorships.author.id:"
+#             for item in author_list:
+#                 index_of_last_slash = item["id"].rfind('/')
+#                 author_id = item["id"][index_of_last_slash + 1:]
+#                 url_author += author_id + "|"
+#             url_author = url_author[:-1]
+#         if data_concept:
+#             concept_list = data_concept["results"]
+#             url_concept = ",concept.id:"
+#             for index, item in enumerate(concept_list):
+#                 index_of_last_slash = item["id"].rfind('/')
+#                 concept_id = item["id"][index_of_last_slash + 1:]
+#                 url_concept += concept_id + "|"
+#             url_concept = url_concept[:-1]
+#
+#         # 拼接url进行搜索
+#         url = base_url + "works?filter=title.search:" + title_name
+#         if url_institution:
+#             url += url_institution
+#         if url_author:
+#             url += url_author
+#         if url_concept:
+#             url += url_concept
+#         url += ",publication_year:>" + str(int(min_year) - 1) + ",publication_year:<" + str(int(max_year) + 1) + "&per-page=50&page=" + page
+#         print(url)
+#         data = requests.get(url).json()
+#         result_list = getWorkDetails(data)
+#         return JsonResponse({'data': result_list, 'error': 0})
+#     except Exception as e:
+#         # 处理异常情况，可以记录日志或返回错误信息
+#         return JsonResponse({"error": str(e)}, status=500000)
 
-    data_institution, data_author, data_concept = await asyncio.gather(
-        fetch_data(url_institution),
-        fetch_data(url_author),
-        fetch_data(url_concept)
-    )
-    # 处理数据可能为 None 的情况
-    # if data_institution is None:
-    #     data_institution = {}
-    # if data_author is None:
-    #     data_author = {}
-    # if data_concept is None:
-    #     data_concept = {}
+# async def fetch_data(url):
+#     async with aiohttp.ClientSession() as client:
+#         try:
+#             async with client.get(url) as response:
+#                 if response.status == 200:
+#                     return await response.json()
+#         except Exception as e:
+#             return None
 
-    if data_institution:
-        institution_list = data_institution["results"]
-        url_institution = ",institution.id:"
-        for item in institution_list:
-            index_of_last_slash = item["id"].rfind('/')
-            institution_id = item["id"][index_of_last_slash + 1:]
-            url_institution += institution_id + "|"
-        url_institution = url_institution[:-1]
-    if data_author:
-        author_list = data_author["results"]
-        url_author = ",authorships.author.id:"
-        for item in author_list:
-            index_of_last_slash = item["id"].rfind('/')
-            author_id = item["id"][index_of_last_slash + 1:]
-            url_author += author_id + "|"
-        url_author = url_author[:-1]
-    if data_concept:
-        concept_list = data_concept["results"]
-        url_concept = ",concept.id:"
-        for index, item in enumerate(concept_list):
-            index_of_last_slash = item["id"].rfind('/')
-            concept_id = item["id"][index_of_last_slash + 1:]
-            url_concept += concept_id + "|"
-        url_concept = url_concept[:-1]
-
-    # 拼接url进行搜索
-    url = base_url + "works?filter=title.search:" + title_name
-    if url_institution:
-        url += url_institution
-    if url_author:
-        url += url_author
-    if url_concept:
-        url += url_concept
-    url += ",publication_year:>" + str(int(min_year) - 1) + ",publication_year:<" + str(int(max_year) + 1)
-    print(url)
-    data = requests.get(url).json()
-    result_list = getWorkDetails(data)
-    return JsonResponse({'data': result_list, 'error': 0})
-
-
-async def fetch_data(url):
-    async with aiohttp.ClientSession() as client:
-        try:
-            async with client.get(url) as response:
-                if response.status == 200:
-                    return await response.json()
-        except Exception as e:
-            return None

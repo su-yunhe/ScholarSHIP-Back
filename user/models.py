@@ -75,3 +75,6 @@ class ArticleAuthor(models.Model):
     id = models.AutoField(primary_key=True)
     article_id = models.CharField(max_length=128, default="")
     scholar_name = models.CharField(max_length=128, default="")
+
+    class Meta:
+        db_table = "article_author"
