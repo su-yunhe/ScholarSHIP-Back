@@ -147,7 +147,7 @@ def get_detail(request):
 
 @csrf_exempt
 @require_http_methods(['GET'])
-def get_referenced_related(request):
+def get_referenced(request):
     work_id = request.GET.get('work_id')
     user_id = request.GET.get('user_id')
     ban_info = Ban.objects.filter(work_id=work_id)
@@ -156,7 +156,7 @@ def get_referenced_related(request):
         if user_id not in ban_info.first().author_id:
             return JsonResponse({"error": 3001, "msg": "未找到论文"})
 
-    response = requests.get(f'https://api.openalex.org/{work_id}/?select=referenced_works,related_works')
+    response = requests.get(f'https://api.openalex.org/{work_id}/?select=referenced_works')
     article = response.json()
 
     referenced = []
@@ -168,6 +168,23 @@ def get_referenced_related(request):
             referenced.append({"id": ref, "title": data.get('title')})
     article["referenced_works"] = referenced
 
+    return JsonResponse({"error": 0, "result": article})
+
+
+@csrf_exempt
+@require_http_methods(['GET'])
+def get_related(request):
+    work_id = request.GET.get('work_id')
+    user_id = request.GET.get('user_id')
+    ban_info = Ban.objects.filter(work_id=work_id)
+
+    if ban_info.exists():
+        if user_id not in ban_info.first().author_id:
+            return JsonResponse({"error": 3001, "msg": "未找到论文"})
+
+    response = requests.get(f'https://api.openalex.org/{work_id}/?select=related_works')
+    article = response.json()
+
     related = []
     for rel in article.get('related_works'):
         rel = rel.split('/')[-1]
@@ -177,6 +194,40 @@ def get_referenced_related(request):
             related.append({"id": rel, "title": data.get('title')})
     article["related_works"] = related
     return JsonResponse({"error": 0, "result": article})
+
+
+# @csrf_exempt
+# @require_http_methods(['GET'])
+# def get_referenced_related(request):
+#     work_id = request.GET.get('work_id')
+#     user_id = request.GET.get('user_id')
+#     ban_info = Ban.objects.filter(work_id=work_id)
+#
+#     if ban_info.exists():
+#         if user_id not in ban_info.first().author_id:
+#             return JsonResponse({"error": 3001, "msg": "未找到论文"})
+#
+#     response = requests.get(f'https://api.openalex.org/{work_id}/?select=referenced_works,related_works')
+#     article = response.json()
+#
+#     referenced = []
+#     for ref in article.get('referenced_works'):
+#         ref = ref.split('/')[-1]
+#         response = requests.get(f'https://api.openalex.org/{ref}/?select=title')
+#         data = response.json()
+#         if data.get('title') != "Deleted Work":
+#             referenced.append({"id": ref, "title": data.get('title')})
+#     article["referenced_works"] = referenced
+#
+#     related = []
+#     for rel in article.get('related_works'):
+#         rel = rel.split('/')[-1]
+#         response = requests.get(f'https://api.openalex.org/{rel}/?select=title')
+#         data = response.json()
+#         if data.get('title') != "Deleted Work":
+#             related.append({"id": rel, "title": data.get('title')})
+#     article["related_works"] = related
+#     return JsonResponse({"error": 0, "result": article})
 
 
 @csrf_exempt
