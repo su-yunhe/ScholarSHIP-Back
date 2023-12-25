@@ -9,4 +9,5 @@ urlpatterns = [
     path("change_status", change_status),
     path("get_citation", get_citation),
     path("get_referenced_related", get_referenced_related),
+    path("get_works_count", get_works_count),
 ]
