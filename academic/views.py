@@ -166,9 +166,7 @@ def get_referenced(request):
         data = response.json()
         if data.get('title') != "Deleted Work":
             referenced.append({"id": ref, "title": data.get('title')})
-    article["referenced_works"] = referenced
-
-    return JsonResponse({"error": 0, "result": article})
+    return JsonResponse({"error": 0, "result": referenced})
 
 
 @csrf_exempt
@@ -192,8 +190,7 @@ def get_related(request):
         data = response.json()
         if data.get('title') != "Deleted Work":
             related.append({"id": rel, "title": data.get('title')})
-    article["related_works"] = related
-    return JsonResponse({"error": 0, "result": article})
+    return JsonResponse({"error": 0, "result": related})
 
 
 # @csrf_exempt
