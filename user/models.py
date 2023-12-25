@@ -25,6 +25,7 @@ class Concern(models.Model):
     user_id = models.IntegerField(default="0")
     scholar_id = models.CharField(max_length=128, default="")
     isDelete = models.BooleanField(default=False)
+    name = models.CharField(max_length=128, default="")
 
     class Meta:
         db_table = "user_concern"
