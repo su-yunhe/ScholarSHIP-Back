@@ -317,12 +317,15 @@ def star_add(request):
         authors_list = [
             authorship.get("author", {}) for authorship in data1["authorships"]
         ]
-        for obj in authors_list:
-            new_link = ArticleAuthor()
-            new_link.article_id = articleid
-            new_link.scholar_name = obj["display_name"]
-            new_link.save()
+        temp = ArticleAuthor.objects.filter(article_id=articleid)
+        if temp.exists():
             print(1)
+        else:
+            for obj in authors_list:
+                new_link = ArticleAuthor()
+                new_link.article_id = articleid
+                new_link.scholar_name = obj["display_name"]
+                new_link.save()
 
         new_star.save()
         return JsonResponse({"error": 0, "msg": "添加收藏成功", "data": authors_list})
@@ -486,12 +489,18 @@ def apply_add(request):
         email = request.POST.get("email")
         content = request.POST.get("content")
         time = request.POST.get("time")
+        user_name = request.POST.get("username")
+        scolarname = request.POST.get("scolarname")
+        ins_name = request.POST.get("insname")
         new_apply = Application()
         new_apply.user_id = userid
         new_apply.scholar_id = scholar_id
         new_apply.email = email
         new_apply.content = content
         new_apply.time = time
+        new_apply.user_name = user_name
+        new_apply.scholar_name = scolarname
+        new_apply.ins_name = ins_name
         new_apply.save()
         return JsonResponse({"error": 0, "msg": "提交申请成功"})
     else:
