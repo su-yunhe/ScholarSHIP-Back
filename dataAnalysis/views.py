@@ -196,16 +196,18 @@ def muti_work_analysis(request):
 def get_institution_basic(request):
     insid = request.POST.get("insId")
 
-    url = institution_url + "/" + insid + "?select=works_count,display_name"
+    url = (
+        institution_url
+        + "/"
+        + insid
+        + "?select=works_count,display_name,cited_by_count"
+    )
     print(url)
     data = requests.get(url)
     data1 = data.json()["works_count"]
     display_name = data.json()["display_name"]
 
-    url1 = institution_url + "/" + insid + "?select=cited_by_count"
-    print(url1)
-    data2 = requests.get(url1)
-    data2 = data2.json()
+    data2 = data.json()["cited_by_count"]
 
     url2 = author_url + "?filter=last_known_institution.id:" + insid
     print(url2)

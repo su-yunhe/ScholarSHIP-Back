@@ -24,4 +24,5 @@ urlpatterns = [
     path("History_delete_all", History_delete_all),
     path("apply_add", apply_add),
     path("get_user_info", get_user_info),
+    path("judge_concern", judge_concern),
 ]
