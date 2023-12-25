@@ -199,7 +199,10 @@ def label_star_add(request):
     if request.method == "POST":
         userid = request.POST.get("userid")
         lname = request.POST.get("name")
-        label_temp = Label.objects.filter(name=lname).filter(isDelete=0)
+        label_temp = (
+            Label.objects.filter(user_id=userid).filter(name=lname).filter(isDelete=0)
+        )
+        print(label_temp.exists())
         if label_temp.exists():
             return JsonResponse(
                 {
@@ -300,6 +303,7 @@ def star_add(request):
             new_link.scholar_name = obj["display_name"]
             new_link.save()
 
+
         new_star.save()
         return JsonResponse({"error": 0, "msg": "添加收藏成功", "data": authors_list})
     else:
@@ -311,13 +315,17 @@ def star_get_all(request):
     if request.method == "POST":
         userid = request.POST.get("userid")
         labelid = request.POST.get("labelId")
-        results = list(
+        results1 = list(
             Star.objects.filter(user_id=userid)
             .filter(label_id=labelid)
             .filter(isDelete=0)
             .values()
         )
-        return JsonResponse({"error": 0, "msg": "获取该标签所有收藏成功", "results": results})
+        for obj in results1:
+            author_temp = ArticleAuthor.objects.filter(article_id=obj["article_id"])
+            if author_temp.exists():
+                print(1)
+        return JsonResponse({"error": 0, "msg": "获取该标签所有收藏成功", "results": results1})
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
 
