@@ -16,17 +16,20 @@ from datetime import datetime
 def get_works(request):
     author_id = request.GET.get('author_id')
     status = request.GET.get('status')
-    page = 1
-    articles = []
-
-    while True:
-        response = requests.get(f'https://api.openalex.org/works?filter=authorships.author.id:{author_id}&per_page=50&page={page}&select=abstract_inverted_index,authorships,cited_by_count,display_name,doi,id,language,primary_location,publication_date')
-        page += 1
-        results = response.json().get('results')
-        if len(results) == 0:
-            break
-        articles += response.json().get('results')
+    count = request.GET.get('count')
+    # page = 1
+    # articles = []
+    #
+    # while True:
+    #     response = requests.get(f'https://api.openalex.org/works?filter=authorships.author.id:{author_id}&per_page=50&page={page}&select=abstract_inverted_index,authorships,cited_by_count,display_name,doi,id,language,primary_location,publication_date')
+    #     page += 1
+    #     results = response.json().get('results')
+    #     if len(results) == 0:
+    #         break
+    #     articles += response.json().get('results')
     # print(articles)
+    response = requests.get(f'https://api.openalex.org/works?filter=authorships.author.id:{author_id}&per_page=50&page={count}&select=abstract_inverted_index,authorships,cited_by_count,display_name,doi,id,language,primary_location,publication_date')
+    articles = response.json().get('results')
     unbanned_articles = []
     banned_articles = []
     for article in articles:
@@ -65,6 +68,14 @@ def get_works(request):
     # print(12222)
     return_articles = unbanned_articles if status == "true" else banned_articles
     return JsonResponse({"error": 0, "result": return_articles})
+
+
+@csrf_exempt
+@require_http_methods(['GET'])
+def get_works_count(request):
+    author_id = request.GET.get('author_id')
+    response = requests.get(f'https://api.openalex.org/authors/{author_id}/?select=works_count')
+    return JsonResponse({"error": 0, "works_count": response.json()})
 
 
 @csrf_exempt
