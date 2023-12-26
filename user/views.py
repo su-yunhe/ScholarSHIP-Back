@@ -175,7 +175,10 @@ def concern_delete(request):
         userid = request.POST.get("userid")
         scholar_id = request.POST.get("scholarId")
         target = (
-            Concern.objects.filter(user_id=userid).filter(scholar_id=scholar_id).get()
+            Concern.objects.filter(user_id=userid)
+            .filter(scholar_id=scholar_id)
+            .filter(isDelete=False)
+            .get()
         )
         print(target.isDelete)
         target.isDelete = True
@@ -448,7 +451,10 @@ def History_get_all(request):
     if request.method == "POST":
         userid = request.POST.get("userid")
         results = list(
-            History.objects.filter(user_id=userid).filter(isDelete=0).values()
+            History.objects.filter(user_id=userid)
+            .filter(isDelete=0)
+            .order_by("-id")
+            .values()
         )
         return JsonResponse({"error": 0, "msg": "获取所有历史成功", "results": results})
     else:
@@ -504,7 +510,7 @@ def apply_add(request):
         email = request.POST.get("email")
         content = request.POST.get("content")
         user_name = request.POST.get("username")
-        scolarname = request.POST.get("scolarname")
+        scolarname = request.POST.get("scholarname")
         ins_name = request.POST.get("insname")
         new_apply = Application()
         new_apply.user_id = userid
