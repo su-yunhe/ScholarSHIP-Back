@@ -160,7 +160,7 @@ def apply_modify_condition(request):
         target.organization = organization
         target.real_name = real_name
         target.save()
-        return JsonResponse({"error": 0, "msg": "申请审核通过"})
+        return JsonResponse({"error": 0, "msg": "申请审核通过", "data": results.status})
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
 
@@ -172,7 +172,7 @@ def apply_refuse_condition(request):
         results = Application.objects.get(id=id)
         results.status = False
         results.save()
-        return JsonResponse({"error": 0, "msg": "已拒绝申请"})
+        return JsonResponse({"error": 0, "msg": "已拒绝申请", "data": results.status})
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
 
