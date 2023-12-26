@@ -213,8 +213,8 @@ def get_referenced_related(request):
 @csrf_exempt
 @require_http_methods(['POST'])
 def change_status(request):
-    work_id = json.loads(request.body).get('work_id')
-
+    # work_id = json.loads(request.body).get('work_id')
+    work_id = request.POST.get("work_id")
     if Ban.objects.filter(work_id=work_id).exists():
         ban = Ban.objects.get(work_id=work_id)
         for author in ban.author_id:
