@@ -4,13 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="917a36c6-408c-40f2-b7c1-2a49102af4e3" name="更改" comment="完成了同步高级搜索，异步搜索待实现，，">
+    <list default="true" id="917a36c6-408c-40f2-b7c1-2a49102af4e3" name="更改" comment="修改了一下高级搜索">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ScholarSHIP/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/ScholarSHIP/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SearchManager/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/SearchManager/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SearchManager/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/SearchManager/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/academic/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/academic/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,7 +83,9 @@
       <workItem from="1703293868957" duration="309000" />
       <workItem from="1703389518653" duration="4386000" />
       <workItem from="1703410398302" duration="1067000" />
-      <workItem from="1703504892161" duration="10690000" />
+      <workItem from="1703504892161" duration="10831000" />
+      <workItem from="1703562456239" duration="3008000" />
+      <workItem from="1703573635009" duration="1614000" />
     </task>
     <task id="LOCAL-00001" summary="完成了基本的搜索接口，无高级检索">
       <created>1703303018291</created>
@@ -116,13 +115,29 @@
       <option name="project" value="LOCAL" />
       <updated>1703506723897</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="修改了一下高级搜索">
+      <created>1703516656491</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1703516656491</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
     <option name="RECENT_FILTERS">
       <map>
         <entry key="User">
@@ -138,20 +153,12 @@
         </entry>
       </map>
     </option>
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-      </map>
-    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="完成了基本的搜索接口，无高级检索" />
     <MESSAGE value="初步完成了高级检索" />
     <MESSAGE value="完成了同步高级搜索，异步搜索待实现，，" />
-    <option name="LAST_COMMIT_MESSAGE" value="完成了同步高级搜索，异步搜索待实现，，" />
+    <MESSAGE value="修改了一下高级搜索" />
+    <option name="LAST_COMMIT_MESSAGE" value="修改了一下高级搜索" />
   </component>
 </project>

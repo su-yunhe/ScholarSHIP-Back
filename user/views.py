@@ -5,6 +5,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import re
 
+from django.utils import timezone
+
 import requests
 from utils.token import create_token
 from .models import *
@@ -132,6 +134,53 @@ def get_user_info(request):
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
 
+# 用户是否认证为指定学者
+@csrf_exempt
+def judge_scholar(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        scholar_id = request.POST.get("scholarId")
+        results = (
+            User.objects.filter(id=userid)
+            .filter(scholar_id=scholar_id)
+        )
+        if results.exists():
+            return JsonResponse({"error": 0, "msg": "用户已认证为指定学者", "results": results.exists()})
+        else:
+            return JsonResponse({"error": 0, "msg": "用户尚未认证为指定学者", "results": results.exists()})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+# 用户是否是认证用户
+@csrf_exempt
+def judge_authenticated(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        results = (
+            User.objects.filter(id=userid)
+            .exclude(scholar_id="")
+        )
+        if results.exists():
+            return JsonResponse({"error": 0, "msg": "用户已认证", "results": results[0].scholar_id})
+        else:
+            return JsonResponse({"error": 0, "msg": "用户尚未认证", "results": results.exists()})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+# 学者是否被某个用户认证
+@csrf_exempt
+def scholar_get_user(request):
+    if request.method == "POST":
+        scholar_id = request.POST.get("scholarId")
+        results = (
+            User.objects.filter(scholar_id=scholar_id)
+        )
+        if results.exists():
+            return JsonResponse({"error": 0, "msg": "学者已被用户认证", "results": results[0].id})
+        else:
+            return JsonResponse({"error": 0, "msg": "学者尚未被用户认证", "results": results.exists()})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
 
 @csrf_exempt
 def concern_add(request):
@@ -158,7 +207,10 @@ def concern_delete(request):
         userid = request.POST.get("userid")
         scholar_id = request.POST.get("scholarId")
         target = (
-            Concern.objects.filter(user_id=userid).filter(scholar_id=scholar_id).get()
+            Concern.objects.filter(user_id=userid)
+            .filter(scholar_id=scholar_id)
+            .filter(isDelete=False)
+            .get()
         )
         print(target.isDelete)
         target.isDelete = True
@@ -376,14 +428,13 @@ def star_delete(request):
         userid = request.POST.get("userid")
         labelid = request.POST.get("labelId")
         id = request.POST.get("id")
-        is_delete = request.POST.get("isDelete")
         target = (
             Star.objects.filter(user_id=userid)
             .filter(label_id=labelid)
             .filter(id=id)
             .get()
         )
-        target.isDelete = is_delete
+        target.isDelete = True
         target.save()
         return JsonResponse({"error": 0, "msg": "取消收藏成功"})
     else:
@@ -396,12 +447,11 @@ def history_add(request):
         userid = request.POST.get("userid")
         type = request.POST.get("type")
         real_id = request.POST.get("realId")
-        time = request.POST.get("time")
         new_history = History()
         new_history.user_id = userid
         new_history.type = type
         new_history.real_id = real_id
-        new_history.time = time
+        new_history.time = timezone.now()
         if type == "0":
             # 0为机构
             url1 = institution_url + "/" + real_id + "?select=display_name"
@@ -433,7 +483,10 @@ def History_get_all(request):
     if request.method == "POST":
         userid = request.POST.get("userid")
         results = list(
-            History.objects.filter(user_id=userid).filter(isDelete=0).values()
+            History.objects.filter(user_id=userid)
+            .filter(isDelete=0)
+            .order_by("-id")
+            .values()
         )
         return JsonResponse({"error": 0, "msg": "获取所有历史成功", "results": results})
     else:
@@ -488,16 +541,15 @@ def apply_add(request):
         scholar_id = request.POST.get("scholarId")
         email = request.POST.get("email")
         content = request.POST.get("content")
-        time = request.POST.get("time")
         user_name = request.POST.get("username")
-        scolarname = request.POST.get("scolarname")
+        scolarname = request.POST.get("scholarname")
         ins_name = request.POST.get("insname")
         new_apply = Application()
         new_apply.user_id = userid
         new_apply.scholar_id = scholar_id
         new_apply.email = email
         new_apply.content = content
-        new_apply.time = time
+        new_apply.time = timezone.now()
         new_apply.user_name = user_name
         new_apply.scholar_name = scolarname
         new_apply.ins_name = ins_name
