@@ -134,6 +134,22 @@ def get_user_info(request):
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
 
+@csrf_exempt
+def judge_scholar(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        scholar_id = request.POST.get("scholarId")
+        results = (
+            User.objects.filter(user_id=userid)
+            .filter(scholar_id=scholar_id)
+            .filter(isDelete=0)
+        )
+        if results.exists():
+            return JsonResponse({"error": 0, "msg": "用户已认证为指定学者", "results": results.exists()})
+        else:
+            return JsonResponse({"error": 0, "msg": "用户尚未认证为指定学者", "results": results.exists()})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
 
 @csrf_exempt
 def concern_add(request):
