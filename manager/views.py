@@ -149,7 +149,7 @@ def apply_modify_condition(request):
     if request.method == "POST":
         id = request.POST.get("id")
         results = Application.objects.get(id=id)
-        results.status = True
+        results.status = 1
         results.save()
         userid = results.user_id
         scholar_id = results.scholar_id
@@ -170,7 +170,7 @@ def apply_refuse_condition(request):
     if request.method == "POST":
         id = request.POST.get("id")
         results = Application.objects.get(id=id)
-        results.status = False
+        results.status = 2
         results.save()
         return JsonResponse({"error": 0, "msg": "已拒绝申请", "data": results.status})
     else:

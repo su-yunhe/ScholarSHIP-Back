@@ -23,7 +23,7 @@ class Application(models.Model):
     email = models.EmailField(unique=True)
     content = models.TextField(default="")
     time = models.DateTimeField(default="")
-    status = models.BooleanField(default=False)
+    status = models.CharField(max_length=128, default="0")
     user_name = models.CharField(max_length=128, default="")
     scholar_name = models.CharField(max_length=128, default="")
     ins_name = models.TextField(default="")
