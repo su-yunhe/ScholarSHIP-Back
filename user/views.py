@@ -140,9 +140,8 @@ def judge_scholar(request):
         userid = request.POST.get("userid")
         scholar_id = request.POST.get("scholarId")
         results = (
-            User.objects.filter(user_id=userid)
+            User.objects.filter(id=userid)
             .filter(scholar_id=scholar_id)
-            .filter(isDelete=0)
         )
         if results.exists():
             return JsonResponse({"error": 0, "msg": "用户已认证为指定学者", "results": results.exists()})
