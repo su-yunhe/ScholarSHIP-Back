@@ -6,6 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="917a36c6-408c-40f2-b7c1-2a49102af4e3" name="更改" comment="修改了一下高级搜索">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,6 +85,7 @@
       <workItem from="1703410398302" duration="1067000" />
       <workItem from="1703504892161" duration="10831000" />
       <workItem from="1703562456239" duration="3008000" />
+      <workItem from="1703573635009" duration="1614000" />
     </task>
     <task id="LOCAL-00001" summary="完成了基本的搜索接口，无高级检索">
       <created>1703303018291</created>
