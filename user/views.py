@@ -438,7 +438,7 @@ def star_delete(request):
         target = (
             Star.objects.filter(user_id=userid)
             .filter(label_id=labelid)
-            .filter(id=id)
+            .filter(article_id=id)
             .get()
         )
         target.isDelete = True
