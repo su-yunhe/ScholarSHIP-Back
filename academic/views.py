@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 
-from .models import Ban
+from .models import Ban, BanCount
 import re
 from datetime import datetime
 
@@ -69,7 +69,10 @@ def get_works(request):
 def get_works_count(request):
     author_id = request.GET.get('author_id')
     response = requests.get(f'https://api.openalex.org/authors/{author_id}/?select=works_count')
-    return JsonResponse({"error": 0, "result": response.json()})
+    count = response.json().get('works_count')
+    if BanCount.objects.filter(author_id=author_id).exists() and count is not None:
+        count -= BanCount.objects.get(author_id=author_id).ban_count
+    return JsonResponse({"error": 0, "result": {"works_count": count}})
 
 
 @csrf_exempt
@@ -213,12 +216,26 @@ def change_status(request):
     work_id = json.loads(request.body).get('work_id')
 
     if Ban.objects.filter(work_id=work_id).exists():
-        Ban.objects.get(work_id=work_id).delete()
+        ban = Ban.objects.get(work_id=work_id)
+        for author in ban.author_id:
+            banCount = BanCount.objects.get(author_id=author)
+            banCount.ban_count -= 1
+            banCount.save()
+            if banCount.ban_count == 0:
+                banCount.delete()
+        ban.delete()
     else:
         response = requests.get(f'https://api.openalex.org/{work_id}/?select=authorships')
         authors = response.json().get("authorships")
         authors = [author.get("author").get("id").split('/')[-1] for author in authors]
         Ban.objects.create(work_id=work_id, author_id=authors)
+        for author in authors:
+            if BanCount.objects.filter(author_id=author).exists():
+                bc = BanCount.objects.get(author_id=author)
+                bc.ban_count += 1
+                bc.save()
+            else:
+                BanCount.objects.create(author_id=author)
 
     return JsonResponse({"error": 0})
 
