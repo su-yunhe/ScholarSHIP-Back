@@ -6,10 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="917a36c6-408c-40f2-b7c1-2a49102af4e3" name="更改" comment="修改了一下高级搜索">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ScholarSHIP/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/ScholarSHIP/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SearchManager/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/SearchManager/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SearchManager/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/SearchManager/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/academic/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/academic/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -130,6 +126,15 @@
     <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
     <option name="RECENT_FILTERS">
       <map>
         <entry key="User">
@@ -141,15 +146,6 @@
                 </option>
               </RecentGroup>
             </list>
-          </value>
-        </entry>
-      </map>
-    </option>
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
           </value>
         </entry>
       </map>
