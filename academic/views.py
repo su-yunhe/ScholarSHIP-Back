@@ -179,6 +179,35 @@ def get_referenced_related(request):
 
 
 @csrf_exempt
+@require_http_methods(['GET'])
+def get_referenced_related(request):
+    work_id = request.GET.get('work_id')
+    user_id = request.GET.get('user_id')
+    ban_info = Ban.objects.filter(work_id=work_id)
+
+    if ban_info.exists():
+        if user_id not in ban_info.first().author_id:
+            return JsonResponse({"error": 3001, "msg": "未找到论文"})
+
+    referenced = requests.get(f'https://api.openalex.org/works?filter=cited_by:{work_id}&select=id,title').json().get("results")
+    related = requests.get(f'https://api.openalex.org/works?filter=related_to:{work_id}&select=id,title').json().get("results")
+
+    article = {}
+    referenced_results = []
+    for ref in referenced:
+        if ref.get('title') != "Deleted Work":
+            referenced_results.append({"id": ref.get("id").split("/")[-1], "title": ref.get('title')})
+    article["referenced_works"] = referenced
+
+    related_results = []
+    for rel in related:
+        if rel.get('title') != "Deleted Work":
+            related_results.append({"id": rel.get("id").split("/")[-1], "title": rel.get('title')})
+    article["related_works"] = related
+    return JsonResponse({"error": 0, "result": article})
+
+
+@csrf_exempt
 @require_http_methods(['POST'])
 def change_status(request):
     work_id = json.loads(request.body).get('work_id')
