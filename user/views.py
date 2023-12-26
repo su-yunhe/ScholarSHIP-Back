@@ -134,6 +134,7 @@ def get_user_info(request):
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
 
+# 用户是否认证为指定学者
 @csrf_exempt
 def judge_scholar(request):
     if request.method == "POST":
@@ -147,6 +148,37 @@ def judge_scholar(request):
             return JsonResponse({"error": 0, "msg": "用户已认证为指定学者", "results": results.exists()})
         else:
             return JsonResponse({"error": 0, "msg": "用户尚未认证为指定学者", "results": results.exists()})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+# 用户是否是认证用户
+@csrf_exempt
+def judge_authenticated(request):
+    if request.method == "POST":
+        userid = request.POST.get("userid")
+        results = (
+            User.objects.filter(id=userid)
+            .exclude(scholar_id="")
+        )
+        if results.exists():
+            return JsonResponse({"error": 0, "msg": "用户已认证", "results": results[0].scholar_id})
+        else:
+            return JsonResponse({"error": 0, "msg": "用户尚未认证", "results": results.exists()})
+    else:
+        return JsonResponse({"error": 2001, "msg": "请求方式错误"})
+
+# 学者是否被某个用户认证
+@csrf_exempt
+def scholar_get_user(request):
+    if request.method == "POST":
+        scholar_id = request.POST.get("scholarId")
+        results = (
+            User.objects.filter(scholar_id=scholar_id)
+        )
+        if results.exists():
+            return JsonResponse({"error": 0, "msg": "学者已被用户认证", "results": results[0].id})
+        else:
+            return JsonResponse({"error": 0, "msg": "学者尚未被用户认证", "results": results.exists()})
     else:
         return JsonResponse({"error": 2001, "msg": "请求方式错误"})
 
