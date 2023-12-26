@@ -5,6 +5,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import re
 
+from django.utils import timezone
+
 import requests
 from utils.token import create_token
 from .models import *
@@ -376,14 +378,13 @@ def star_delete(request):
         userid = request.POST.get("userid")
         labelid = request.POST.get("labelId")
         id = request.POST.get("id")
-        is_delete = request.POST.get("isDelete")
         target = (
             Star.objects.filter(user_id=userid)
             .filter(label_id=labelid)
             .filter(id=id)
             .get()
         )
-        target.isDelete = is_delete
+        target.isDelete = True
         target.save()
         return JsonResponse({"error": 0, "msg": "取消收藏成功"})
     else:
@@ -396,12 +397,11 @@ def history_add(request):
         userid = request.POST.get("userid")
         type = request.POST.get("type")
         real_id = request.POST.get("realId")
-        time = request.POST.get("time")
         new_history = History()
         new_history.user_id = userid
         new_history.type = type
         new_history.real_id = real_id
-        new_history.time = time
+        new_history.time = timezone.now()
         if type == "0":
             # 0为机构
             url1 = institution_url + "/" + real_id + "?select=display_name"
@@ -488,7 +488,6 @@ def apply_add(request):
         scholar_id = request.POST.get("scholarId")
         email = request.POST.get("email")
         content = request.POST.get("content")
-        time = request.POST.get("time")
         user_name = request.POST.get("username")
         scolarname = request.POST.get("scolarname")
         ins_name = request.POST.get("insname")
@@ -497,7 +496,7 @@ def apply_add(request):
         new_apply.scholar_id = scholar_id
         new_apply.email = email
         new_apply.content = content
-        new_apply.time = time
+        new_apply.time = timezone.now()
         new_apply.user_name = user_name
         new_apply.scholar_name = scolarname
         new_apply.ins_name = ins_name
